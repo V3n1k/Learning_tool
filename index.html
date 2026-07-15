@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1117">
+  <title>Learning Tool — моя учёба</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="logo">📚 Learning<span>Tool</span></a>
+    <nav class="topnav">
+      <a href="#/" data-nav="home">Курсы</a>
+      <a href="#/inbox" data-nav="inbox">Планирую узнать</a>
+      <a href="#/stats" data-nav="stats">Статистика</a>
+      <a href="#/settings" data-nav="settings">Настройки</a>
+    </nav>
+    <button class="btn btn-accent" id="askClaudeBtn" title="Собрать вопрос для Claude">🤖 Спросить Claude</button>
+  </header>
+
+  <main id="app"></main>
+
+  <!-- Модалка "Спросить Claude" -->
+  <div class="modal-backdrop hidden" id="askModal">
+    <div class="modal">
+      <div class="modal-head">
+        <h2>🤖 Вопрос для Claude</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field">
+          <span>Контекст (что Claude должен знать; подставляется автоматически, можно править)</span>
+          <textarea id="askContext" rows="6" placeholder="Например: текст урока, твой код, условие задачи..."></textarea>
+        </label>
+        <label class="field">
+          <span>Твой вопрос</span>
+          <textarea id="askQuestion" rows="4" placeholder="Что именно непонятно? Что нужно проверить?"></textarea>
+        </label>
+        <label class="field checkbox">
+          <input type="checkbox" id="askFormat" checked>
+          <span>Добавить напоминание про формат объяснений (входы/выходы функций, комментарии к коду)</span>
+        </label>
+      </div>
+      <div class="modal-foot">
+        <span class="hint" id="askHint"></span>
+        <button class="btn btn-accent" id="askCopyBtn">📋 Скопировать вопрос</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка редактора урока/курса -->
+  <div class="modal-backdrop hidden" id="editModal">
+    <div class="modal modal-wide">
+      <div class="modal-head">
+        <h2 id="editTitle">Редактор</h2>
+        <button class="btn-icon" data-close-modal>✕</button>
+      </div>
+      <div class="modal-body" id="editBody"></div>
+      <div class="modal-foot">
+        <span class="hint">Сохраняется локально в браузере. Не забывай про экспорт в Настройках.</span>
+        <button class="btn btn-accent" id="editSaveBtn">💾 Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="content/manifest.js"></script>
+  <script src="content/golang.js"></script>
+  <script src="content/ege-informatika.js"></script>
+  <script src="content/ege-math.js"></script>
+  <script src="content/ege-russian.js"></script>
+  <script src="content/english.js"></script>
+  <script src="content/cs.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

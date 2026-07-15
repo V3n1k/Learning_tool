@@ -1,0 +1,10 @@
+{
+  "name": "Learning Tool",
+  "short_name": "LearnTool",
+  "description": "Оффлайн-платформа для подготовки к ЕГЭ, изучения Go, английского и CS",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#0f1117",
+  "icons": []
+}
