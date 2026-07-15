@@ -265,6 +265,42 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 .video-card .video-note { font-size: 0.8rem; color: var(--text-dim); }
 .video-card .video-actions { display: flex; gap: 6px; }
 
+/* практика: редактор кода + Pyodide */
+main.app-wide { max-width: 1400px; }
+
+.practice-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.practice-layout { display: grid; grid-template-columns: minmax(280px, 420px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) {
+  .practice-layout { grid-template-columns: 1fr; }
+}
+
+.practice-statement {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 22px; max-height: 80vh; overflow-y: auto;
+}
+.practice-tests-list { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.practice-tests-list h3 { font-size: 0.95rem; margin-bottom: 8px; color: var(--accent2); }
+.test-case-preview {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; margin-bottom: 8px; font-size: 0.85rem;
+}
+.test-case-preview code { word-break: break-all; }
+
+.practice-editor-col { display: flex; flex-direction: column; gap: 12px; position: sticky; top: 76px; }
+.cm-host { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.cm-host .CodeMirror { height: 360px; font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.9rem; }
+
+.practice-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.test-result {
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+.test-result code { word-break: break-all; white-space: pre-wrap; }
+.test-pass { background: rgba(76, 175, 125, 0.1); border-color: var(--green); }
+.test-fail { background: rgba(224, 92, 92, 0.1); border-color: var(--red); }
+
 @media (max-width: 640px) {
   .topbar { padding: 10px 14px; gap: 10px; }
   main { padding: 16px 12px 60px; }

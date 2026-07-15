@@ -36,11 +36,14 @@ let user = LS.get("lt_user", {
 });
 // «планирую узнать»: [{id, title, url, note, status: "new"|"done", createdAt}]
 let inbox = LS.get("lt_inbox", []);
+// код студента в редакторе практики: "courseId::moduleId::lessonId::practiceId" -> код
+let practiceCode = LS.get("lt_practice_code", {});
 
 function saveProgress() { LS.set("lt_progress", progress); scheduleAutosave(); }
 function saveVisits() { LS.set("lt_visits", visits); scheduleAutosave(); }
 function saveUser() { LS.set("lt_user", user); scheduleAutosave(); }
 function saveInbox() { LS.set("lt_inbox", inbox); scheduleAutosave(); }
+function savePracticeCode() { LS.set("lt_practice_code", practiceCode); scheduleAutosave(); }
 
 /* ---------------- автосохранение в файл на диске ----------------
  * Всё и так автоматически сохраняется в localStorage при каждом действии.
@@ -82,7 +85,7 @@ let autosaveState = "off";      // off | on | paused (нужно разреше�
 let autosaveTimer = null;
 
 function backupData() {
-  return { exportedAt: new Date().toISOString(), progress, visits, user, inbox };
+  return { exportedAt: new Date().toISOString(), progress, visits, user, inbox, practiceCode };
 }
 
 async function writeAutosave() {
@@ -191,7 +194,8 @@ function effectiveContent() {
           title: ov.title !== undefined ? ov.title : l.title,
           theory: ov.theory !== undefined ? ov.theory : (l.theory || ""),
           homework: ov.homework !== undefined ? ov.homework : (l.homework || ""),
-          cards: ov.cards !== undefined ? ov.cards : (l.cards || [])
+          cards: ov.cards !== undefined ? ov.cards : (l.cards || []),
+          practice: l.practice || []
         });
       }
       course.modules.push(mod);
@@ -390,6 +394,7 @@ function route() {
   const hash = location.hash || "#/";
   const parts = hash.slice(2).split("/").map(decodeURIComponent).filter(Boolean);
   document.querySelectorAll(".topnav a").forEach(a => a.classList.remove("active"));
+  app.classList.toggle("app-wide", parts[0] === "practice");
 
   if (parts.length === 0) {
     markNav("home"); renderHome();
@@ -403,6 +408,8 @@ function route() {
     markNav("home"); renderCourse(parts[1]);
   } else if (parts[0] === "lesson" && parts.length >= 4) {
     markNav("home"); renderLesson(parts[1], parts[2], parts[3]);
+  } else if (parts[0] === "practice" && parts.length >= 4) {
+    markNav("home"); renderPractice(parts[1], parts[2], parts[3], parts[4]);
   } else {
     renderHome();
   }
@@ -538,7 +545,11 @@ function renderLesson(cid, mid, lid) {
       '</button>' +
       '<button class="btn" id="hwAskBtn">📤 Сдать ДЗ Claude (скопировать)</button>';
   }
-  html += '<button class="btn" id="lessonAskBtn">🤖 Спросить по уроку</button></div>';
+  html += '<button class="btn" id="lessonAskBtn">🤖 Спросить по уроку</button>';
+  if (lesson.practice && lesson.practice.length) {
+    html += '<a class="btn btn-accent" href="#/practice/' + [cid, mid, lid].map(encodeURIComponent).join("/") + '">🧑‍💻 Практика (' + lesson.practice.length + ')</a>';
+  }
+  html += '</div>';
 
   html += '<div class="lesson-content">' + renderMd(lesson.theory || "*Пока пусто — нажми «Редактировать».*") + '</div>';
   if (lesson.homework) {
@@ -593,6 +604,203 @@ function renderLesson(cid, mid, lid) {
     if (!confirm('Удалить урок «' + lesson.title + '»?')) return;
     deleteEntity(key);
     location.hash = "#/course/" + encodeURIComponent(cid);
+  };
+}
+
+/* ---------------- практика: редактор кода + Pyodide ----------------
+ * Pyodide — CPython, скомпилированный в WebAssembly. Выполняется ПРЯМО
+ * в браузере, без серверов. Работает ТОЛЬКО когда сайт открыт по http(s)
+ * (python -m http.server) — Pyodide грузит .wasm через fetch(), а fetch
+ * не работает при открытии index.html напрямую (file://). */
+
+let pyodidePromise = null;
+function ensurePyodide() {
+  if (!pyodidePromise) {
+    pyodidePromise = loadPyodide({ indexURL: "js/vendor/pyodide/" });
+  }
+  return pyodidePromise;
+}
+
+async function runPracticeTests(problem, code) {
+  // ПРИНИМАЕТ: описание задачи (problem.tests, опционально problem.files) и код студента (строка).
+  // ВОЗВРАЩАЕТ: массив результатов — по одному объекту {pass, actual, expected, errorText, input} на тест.
+  const pyodide = await ensurePyodide();
+  if (problem.files) {
+    for (const f of problem.files) {
+      const resp = await fetch(f.path);
+      const buf = await resp.arrayBuffer();
+      pyodide.FS.writeFile(f.name, new Uint8Array(buf));
+    }
+  }
+  const results = [];
+  for (const test of problem.tests) {
+    pyodide.globals.set("__student_code__", code);
+    pyodide.globals.set("__test_input__", test.input || "");
+    let actual = "", errorText = "";
+    try {
+      pyodide.runPython(
+        "import sys, io, traceback\n" +
+        "sys.stdin = io.StringIO(__test_input__)\n" +
+        "_buf = io.StringIO()\n" +
+        "_old = sys.stdout\n" +
+        "sys.stdout = _buf\n" +
+        "try:\n" +
+        "    exec(__student_code__, {})\n" +
+        "except Exception:\n" +
+        "    _buf.write('\\n[ОШИБКА]\\n' + traceback.format_exc())\n" +
+        "finally:\n" +
+        "    sys.stdout = _old\n" +
+        "__test_output__ = _buf.getvalue()\n"
+      );
+      actual = pyodide.globals.get("__test_output__");
+    } catch (e) {
+      errorText = String(e);
+    }
+    const pass = !errorText && !/\[ОШИБКА\]/.test(actual) && actual.trim() === (test.expected || "").trim();
+    results.push({ pass, actual, expected: test.expected || "", errorText, input: test.input || "" });
+  }
+  return results;
+}
+
+let cmEditor = null;          // единственный экземпляр CodeMirror — переиспользуется между вкладками
+let practiceCtx = null;       // { cid, mid, lid, lesson, activeIdx }
+
+function practiceCodeKey(cid, mid, lid, practiceId) {
+  return [cid, mid, lid, practiceId].join("::");
+}
+
+function renderPractice(cid, mid, lid, practiceIdParam) {
+  const courses = effectiveContent();
+  const course = findCourse(courses, cid);
+  const mod = course && course.modules.find(m => m.id === mid);
+  const lesson = mod && mod.lessons.find(l => l.id === lid);
+  if (!lesson || !lesson.practice || !lesson.practice.length) {
+    app.innerHTML = '<p class="empty">Практика для этого урока не найдена. <a href="#/lesson/' +
+      [cid, mid, lid].map(encodeURIComponent).join("/") + '">Вернуться к уроку</a></p>';
+    return;
+  }
+  let activeIdx = lesson.practice.findIndex(p => p.id === practiceIdParam);
+  if (activeIdx < 0) activeIdx = 0;
+  practiceCtx = { cid, mid, lid, lesson, activeIdx };
+
+  const tabsHtml = lesson.practice.map((p, i) =>
+    '<button class="btn btn-sm ' + (i === activeIdx ? "btn-accent" : "") + '" data-practice-tab="' + i + '">' + esc(p.title) + '</button>'
+  ).join(" ");
+
+  let html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' +
+    esc(course.title) + '</a> / <a href="#/lesson/' + [cid, mid, lid].map(encodeURIComponent).join("/") + '">' +
+    esc(lesson.title) + '</a> / Практика</div>' +
+    '<div class="page-head"><h1>🧑‍💻 Практика: ' + esc(lesson.title) + '</h1></div>' +
+    '<div class="practice-tabs">' + tabsHtml + '</div>' +
+    '<div id="practiceBody"></div>';
+
+  app.innerHTML = html;
+  document.querySelectorAll("[data-practice-tab]").forEach(b => {
+    b.onclick = () => {
+      saveCurrentEditorCode();
+      location.hash = "#/practice/" + [cid, mid, lid, lesson.practice[+b.dataset.practiceTab].id].map(encodeURIComponent).join("/");
+    };
+  });
+  renderPracticeProblem();
+}
+
+function saveCurrentEditorCode() {
+  if (!cmEditor || !practiceCtx) return;
+  const { cid, mid, lid, lesson, activeIdx } = practiceCtx;
+  const problem = lesson.practice[activeIdx];
+  const key = practiceCodeKey(cid, mid, lid, problem.id);
+  practiceCode[key] = cmEditor.getValue();
+  savePracticeCode();
+}
+
+function renderPracticeProblem() {
+  const { cid, mid, lid, lesson, activeIdx } = practiceCtx;
+  const problem = lesson.practice[activeIdx];
+  const key = practiceCodeKey(cid, mid, lid, problem.id);
+  const savedCode = practiceCode[key];
+
+  const body = document.getElementById("practiceBody");
+  body.innerHTML =
+    '<div class="practice-layout">' +
+      '<div class="practice-statement">' + renderMd(problem.statement) +
+        '<div class="practice-tests-list"><h3>Тесты (' + problem.tests.length + ')</h3>' +
+        problem.tests.map((t, i) => (
+          '<div class="test-case-preview"><b>Тест ' + (i + 1) + '</b><br>' +
+          '<span class="hint">вход:</span> <code>' + esc(JSON.stringify(t.input || "")) + '</code><br>' +
+          '<span class="hint">ожидается:</span> <code>' + esc(t.expected) + '</code></div>'
+        )).join("") +
+        '</div>' +
+        (problem.solution
+          ? '<button class="btn btn-sm" id="revealSolutionBtn">💡 Показать эталонное решение</button>' +
+            '<div class="hidden" id="solutionBlock"><pre><code class="language-python">' + esc(problem.solution) + '</code></pre></div>'
+          : "") +
+      '</div>' +
+      '<div class="practice-editor-col">' +
+        '<div id="cmHost" class="cm-host"></div>' +
+        '<div class="practice-actions">' +
+          '<button class="btn btn-accent" id="runTestsBtn">▶ Запустить на всех тестах</button>' +
+          '<button class="btn" id="resetCodeBtn">↺ Сбросить к заготовке</button>' +
+          '<span id="runStatus" class="hint"></span>' +
+        '</div>' +
+        '<div id="testResults"></div>' +
+      '</div>' +
+    '</div>';
+
+  cmEditor = CodeMirror(document.getElementById("cmHost"), {
+    value: savedCode !== undefined ? savedCode : problem.starterCode,
+    mode: "python",
+    theme: "material-darker",
+    lineNumbers: true,
+    matchBrackets: true,
+    indentUnit: 4,
+    tabSize: 4,
+    viewportMargin: Infinity
+  });
+  let saveTimer = null;
+  cmEditor.on("change", () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveCurrentEditorCode, 800);
+  });
+
+  const revealBtn = document.getElementById("revealSolutionBtn");
+  if (revealBtn) revealBtn.onclick = () => {
+    document.getElementById("solutionBlock").classList.toggle("hidden");
+    if (window.Prism) Prism.highlightAllUnder(document.getElementById("solutionBlock"));
+  };
+
+  document.getElementById("resetCodeBtn").onclick = () => {
+    if (!confirm("Стереть текущий код и вернуть заготовку?")) return;
+    cmEditor.setValue(problem.starterCode);
+    saveCurrentEditorCode();
+  };
+
+  document.getElementById("runTestsBtn").onclick = async () => {
+    const status = document.getElementById("runStatus");
+    const resultsBox = document.getElementById("testResults");
+    status.textContent = "⏳ Запускаю Python в браузере (первый раз — до нескольких секунд)…";
+    resultsBox.innerHTML = "";
+    saveCurrentEditorCode();
+    try {
+      const results = await runPracticeTests(problem, cmEditor.getValue());
+      const passed = results.filter(r => r.pass).length;
+      status.textContent = passed === results.length
+        ? "✅ Все тесты пройдены (" + passed + "/" + results.length + ")"
+        : "❌ Пройдено " + passed + " из " + results.length;
+      resultsBox.innerHTML = results.map((r, i) => (
+        '<div class="test-result ' + (r.pass ? "test-pass" : "test-fail") + '">' +
+        '<b>Тест ' + (i + 1) + (r.pass ? " ✅" : " ❌") + '</b>' +
+        (r.pass ? "" :
+          '<div><span class="hint">вход:</span> <code>' + esc(JSON.stringify(r.input)) + '</code></div>' +
+          '<div><span class="hint">ожидалось:</span> <code>' + esc(r.expected) + '</code></div>' +
+          '<div><span class="hint">получено:</span> <code>' + esc(r.actual || r.errorText) + '</code></div>'
+        ) +
+        '</div>'
+      )).join("");
+    } catch (e) {
+      status.textContent = "⚠️ Не удалось запустить Python в браузере.";
+      resultsBox.innerHTML = '<div class="test-result test-fail">' + esc(String(e)) +
+        '<br><br>Скорее всего платформа открыта напрямую как файл. Запусти <code>python -m http.server 8000</code> в папке проекта и открой <code>http://localhost:8000</code> — Pyodide работает только по http(s).</div>';
+    }
   };
 }
 
@@ -879,6 +1087,7 @@ function renderSettings() {
         if (data.visits) { visits = data.visits; saveVisits(); }
         if (data.user) { user = data.user; saveUser(); }
         if (data.inbox) { inbox = data.inbox; saveInbox(); }
+        if (data.practiceCode) { practiceCode = data.practiceCode; savePracticeCode(); }
         toast("Импортировано ✅");
         route();
       } catch (err) {

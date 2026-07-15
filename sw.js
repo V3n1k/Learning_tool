@@ -3,7 +3,7 @@
  * или GitHub Pages. При открытии index.html напрямую (file://) он не нужен —
  * файлы и так локальные. */
 
-const CACHE = "learning-tool-v4";
+const CACHE = "learning-tool-v5";
 
 const ASSETS = [
   "./",
