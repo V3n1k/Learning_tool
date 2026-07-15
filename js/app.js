@@ -38,11 +38,15 @@ let user = LS.get("lt_user", {
 let inbox = LS.get("lt_inbox", []);
 // код студента в редакторе практики: "courseId::moduleId::lessonId::practiceId" -> код
 let practiceCode = LS.get("lt_practice_code", {});
+// повторение практики (интервальные повторения): тот же ключ ->
+// { successCount, lastSuccessAt, nextDueAt }
+let practiceReview = LS.get("lt_practice_review", {});
 
 function saveProgress() { LS.set("lt_progress", progress); scheduleAutosave(); }
 function saveVisits() { LS.set("lt_visits", visits); scheduleAutosave(); }
 function saveUser() { LS.set("lt_user", user); scheduleAutosave(); }
 function saveInbox() { LS.set("lt_inbox", inbox); scheduleAutosave(); }
+function savePracticeReview() { LS.set("lt_practice_review", practiceReview); scheduleAutosave(); }
 function savePracticeCode() { LS.set("lt_practice_code", practiceCode); scheduleAutosave(); }
 
 /* ---------------- автосохранение в файл на диске ----------------
@@ -85,7 +89,7 @@ let autosaveState = "off";      // off | on | paused (нужно разреше�
 let autosaveTimer = null;
 
 function backupData() {
-  return { exportedAt: new Date().toISOString(), progress, visits, user, inbox, practiceCode };
+  return { exportedAt: new Date().toISOString(), progress, visits, user, inbox, practiceCode, practiceReview };
 }
 
 async function writeAutosave() {
@@ -448,9 +452,12 @@ function route() {
   const parts = hash.slice(2).split("/").map(decodeURIComponent).filter(Boolean);
   document.querySelectorAll(".topnav a").forEach(a => a.classList.remove("active"));
   app.classList.toggle("app-wide", parts[0] === "practice");
+  updateReviewBadge();
 
   if (parts.length === 0) {
     markNav("home"); renderHome();
+  } else if (parts[0] === "review") {
+    markNav("review"); renderReview();
   } else if (parts[0] === "inbox") {
     markNav("inbox"); renderInbox();
   } else if (parts[0] === "stats") {
@@ -472,6 +479,13 @@ function route() {
 function markNav(name) {
   const el = document.querySelector('.topnav a[data-nav="' + name + '"]');
   if (el) el.classList.add("active");
+}
+
+function updateReviewBadge() {
+  const el = document.querySelector('.topnav a[data-nav="review"]');
+  if (!el) return;
+  const n = countDueReviews();
+  el.textContent = "🔁 Повторение" + (n > 0 ? " (" + n + ")" : "");
 }
 
 /* ---------------- страница: курсы ---------------- */
@@ -724,6 +738,35 @@ function practiceCodeKey(cid, mid, lid, practiceId) {
   return [cid, mid, lid, practiceId].join("::");
 }
 
+/* ---------------- повторение практики (интервальные повторения) ----------------
+ * Классическая схема интервалов, как в лёгких SRS-приложениях: 1 → 3 → 7 → 14 → 30 дней.
+ * Каждое успешное прохождение ВСЕХ тестов сдвигает следующее повторение дальше. */
+
+const REVIEW_INTERVALS_DAYS = [1, 3, 7, 14, 30];
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function recordPracticeSuccess(key) {
+  // ПРИНИМАЕТ: ключ вида "cid::mid::lid::practiceId". НИЧЕГО не возвращает —
+  // обновляет practiceReview[key] и планирует следующее повторение.
+  const rec = practiceReview[key] || { successCount: 0 };
+  rec.successCount += 1;
+  rec.lastSuccessAt = Date.now();
+  const days = REVIEW_INTERVALS_DAYS[Math.min(rec.successCount - 1, REVIEW_INTERVALS_DAYS.length - 1)];
+  rec.nextDueAt = Date.now() + days * DAY_MS;
+  practiceReview[key] = rec;
+  savePracticeReview();
+}
+
+function formatDue(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
+function countDueReviews() {
+  const now = Date.now();
+  return Object.values(practiceReview).filter(r => r.nextDueAt <= now).length;
+}
+
 function renderPractice(cid, mid, lid, practiceIdParam) {
   const courses = effectiveContent();
   const course = findCourse(courses, cid);
@@ -867,9 +910,17 @@ function renderPracticeProblem() {
     try {
       const results = await runPracticeTests(problem, cmEditor.getValue());
       const passed = results.filter(r => r.pass).length;
-      status.textContent = passed === results.length
-        ? "✅ Все тесты пройдены (" + passed + "/" + results.length + ")"
-        : "❌ Пройдено " + passed + " из " + results.length;
+      if (passed === results.length && !solutionMode) {
+        // засчитываем только реальную самостоятельную попытку — не прогон эталонного решения
+        const reviewKey = practiceCodeKey(cid, mid, lid, problem.id);
+        recordPracticeSuccess(reviewKey);
+        const rec = practiceReview[reviewKey];
+        status.textContent = "✅ Все тесты пройдены (" + passed + "/" + results.length + ") — следующее повторение: " + formatDue(rec.nextDueAt);
+      } else {
+        status.textContent = passed === results.length
+          ? "✅ Все тесты пройдены (" + passed + "/" + results.length + ")"
+          : "❌ Пройдено " + passed + " из " + results.length;
+      }
       resultsBox.innerHTML = results.map((r, i) => (
         '<div class="test-result ' + (r.pass ? "test-pass" : "test-fail") + '">' +
         '<b>Тест ' + (i + 1) + (r.pass ? " ✅" : " ❌") + '</b>' +
@@ -1050,6 +1101,79 @@ function renderInbox() {
   });
 }
 
+/* ---------------- страница: повторение практики ---------------- */
+
+function renderReview() {
+  const courses = effectiveContent();
+  const now = Date.now();
+  const due = [], upcoming = [], neverTried = [];
+
+  for (const c of courses) {
+    for (const { mod, lesson } of flatLessons(c)) {
+      if (!lesson.practice || !lesson.practice.length) continue;
+      for (const p of lesson.practice) {
+        const key = practiceCodeKey(c.id, mod.id, lesson.id, p.id);
+        const rec = practiceReview[key];
+        const item = { course: c, mod, lesson, problem: p, rec, key };
+        if (!rec) neverTried.push(item);
+        else if (rec.nextDueAt <= now) due.push(item);
+        else upcoming.push(item);
+      }
+    }
+  }
+  due.sort((a, b) => a.rec.nextDueAt - b.rec.nextDueAt);
+  upcoming.sort((a, b) => a.rec.nextDueAt - b.rec.nextDueAt);
+
+  const practiceUrl = it => "#/practice/" + [it.course.id, it.mod.id, it.lesson.id, it.problem.id].map(encodeURIComponent).join("/");
+
+  let html = '<div class="page-head"><h1>🔁 Повторение</h1></div>' +
+    '<div class="settings-block"><h2>Как это работает</h2>' +
+    '<p>Каждый раз, когда ты успешно проходишь все тесты в «Практике», следующее повторение планируется автоматически: 1 день → 3 дня → 7 дней → 14 дней → 30 дней после каждого успеха (чем увереннее решаешь — тем реже повторяем, как в интервальных повторениях). Здесь — что пора повторить сегодня.</p>' +
+    '<p>Хочешь больше задач того же типа, чем есть на платформе — открой официальный банк заданий: ' +
+    '<a href="https://inf-ege.sdamgia.ru/prob_catalog" target="_blank" rel="noopener">каталог заданий на Решу ЕГЭ</a>.</p>' +
+    '</div>';
+
+  html += '<div class="settings-block"><h2>Пора повторить (' + due.length + ')</h2>';
+  if (!due.length) {
+    html += '<p>Ничего не просрочено — всё повторено вовремя. 🎉</p>';
+  }
+  for (const it of due) {
+    html += '<div class="lesson-row">' +
+      '<span class="status">🔁</span>' +
+      '<span style="flex:1"><a href="' + practiceUrl(it) + '">' + esc(it.lesson.title) + ' — ' + esc(it.problem.title) + '</a>' +
+      '<br><span class="hint">' + esc(it.course.title) + ' · пройдено успешно ' + it.rec.successCount + ' раз(а), ждало с ' + formatDue(it.rec.nextDueAt) + '</span></span>' +
+      '<a class="btn btn-sm btn-accent" href="' + practiceUrl(it) + '">Повторить</a>' +
+      '</div>';
+  }
+  html += '</div>';
+
+  if (upcoming.length) {
+    html += '<div class="settings-block" style="opacity:.75"><h2>Скоро (' + upcoming.length + ')</h2>';
+    for (const it of upcoming) {
+      html += '<div class="lesson-row">' +
+        '<span class="status">⏳</span>' +
+        '<span style="flex:1"><a href="' + practiceUrl(it) + '">' + esc(it.lesson.title) + ' — ' + esc(it.problem.title) + '</a>' +
+        '<br><span class="hint">' + esc(it.course.title) + ' · следующее повторение: ' + formatDue(it.rec.nextDueAt) + '</span></span>' +
+        '</div>';
+    }
+    html += '</div>';
+  }
+
+  if (neverTried.length) {
+    html += '<div class="settings-block" style="opacity:.6"><h2>Ещё не пройдено (' + neverTried.length + ')</h2>';
+    for (const it of neverTried) {
+      html += '<div class="lesson-row">' +
+        '<span class="status">⚪</span>' +
+        '<span style="flex:1"><a href="' + practiceUrl(it) + '">' + esc(it.lesson.title) + ' — ' + esc(it.problem.title) + '</a>' +
+        '<br><span class="hint">' + esc(it.course.title) + '</span></span>' +
+        '</div>';
+    }
+    html += '</div>';
+  }
+
+  app.innerHTML = html;
+}
+
 /* ---------------- страница: статистика ---------------- */
 
 function renderStats() {
@@ -1172,6 +1296,7 @@ function renderSettings() {
         if (data.user) { user = data.user; saveUser(); }
         if (data.inbox) { inbox = data.inbox; saveInbox(); }
         if (data.practiceCode) { practiceCode = data.practiceCode; savePracticeCode(); }
+        if (data.practiceReview) { practiceReview = data.practiceReview; savePracticeReview(); }
         toast("Импортировано ✅");
         route();
       } catch (err) {
