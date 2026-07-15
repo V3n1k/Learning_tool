@@ -149,6 +149,17 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
   font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.88em;
   color: #8fd3a7;
 }
+/* ссылка на конкретную задачу в проверенном банке (Решу ЕГЭ / ФИПИ) — заметная "плашка",
+   отличается от обычных ссылок: сразу видно, что это конкретная задача с реальным ответом */
+.hw-block a.task-link, .lesson-content a.task-link {
+  display: inline-block; background: rgba(224, 176, 76, 0.14);
+  border: 1px solid var(--yellow); color: var(--yellow);
+  padding: 1px 9px; border-radius: 6px; font-size: 0.9em;
+  text-decoration: none; font-weight: 600;
+}
+.hw-block a.task-link:hover, .lesson-content a.task-link:hover {
+  background: rgba(224, 176, 76, 0.26); text-decoration: none;
+}
 .lesson-content pre {
   background: #12141b; border: 1px solid var(--border);
   padding: 14px 16px; border-radius: 10px; overflow-x: auto; margin: 12px 0;

@@ -252,7 +252,14 @@ function inlineMd(s) {
     // картинка: ![подпись](путь) — путь может быть локальным (images/...) или http(s)-ссылкой.
     // Обязательно ДО обычных ссылок — иначе [подпись](путь) внутри распознается как ссылка.
     .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">')
-    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, (m, text, url) => {
+      // ссылки на проверенные банки задач (Решу ЕГЭ, ФИПИ) оформляем как "плашку задачи" —
+      // отдельным цветом/иконкой, чтобы сразу было видно: это КОНКРЕТНАЯ задача с реальным ответом,
+      // а не общая ссылка на статью или документацию.
+      const isTaskLink = /(^|\.)sdamgia\.ru|(^|\.)fipi\.ru/.test(url.replace(/^https?:\/\//, ""));
+      const cls = isTaskLink ? ' class="task-link"' : "";
+      return '<a href="' + url + '"' + cls + ' target="_blank" rel="noopener">' + (isTaskLink ? "📝 " : "") + text + '</a>';
+    })
     .replace(/(^|[\s(])((https?:\/\/)[^\s)<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
 }
 
