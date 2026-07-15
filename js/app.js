@@ -234,16 +234,28 @@ function esc(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function unesc(s) {
+  // обратная операция к esc() — нужна, чтобы достать исходный JS/JSON из
+  // экранированного текста markdown (например, код внутри блока ```jsxgraph)
+  return s.replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&");
+}
+
 function inlineMd(s) {
   return s
     .replace(/`([^`]+)`/g, (m, code) => "<code>" + code + "</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1<em>$2</em>")
+    // картинка: ![подпись](путь) — путь может быть локальным (images/...) или http(s)-ссылкой.
+    // Обязательно ДО обычных ссылок — иначе [подпись](путь) внутри распознается как ссылка.
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">')
     .replace(/\[([^\]]+)\]\((https?:[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
     .replace(/(^|[\s(])((https?:\/\/)[^\s)<]+)/g, '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
 }
 
-function renderMd(text) {
+function renderMd(text, graphSpecs) {
+  // graphSpecs — необязательный массив; если передан, в него складываются
+  // описания блоков ```jsxgraph для последующей отрисовки после вставки в DOM
+  // (сам renderMd возвращает только строку HTML и не может исполнять JS).
   const lines = esc(text.replace(/\r\n/g, "\n")).split("\n");
   const out = [];
   let i = 0;
@@ -256,17 +268,30 @@ function renderMd(text) {
   while (i < lines.length) {
     const line = lines[i];
 
-    // блок кода ```
+    // блок кода ``` (или ```jsxgraph — интерактивный график/чертёж)
     let fenceMatch;
-    if ((fenceMatch = line.match(/^```(\w+)?/))) {
+    if ((fenceMatch = line.match(/^```(\w+)?(.*)$/))) {
       closeList();
-      const lang = fenceMatch[1] || "";
-      // сопоставляем частые обозначения с классами языков, которые понимает Prism
-      const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang.toLowerCase()] || "";
+      const lang = (fenceMatch[1] || "").toLowerCase();
+      const restOfLine = (fenceMatch[2] || "").trim();
       const buf = [];
       i++;
       while (i < lines.length && !/^```/.test(lines[i])) { buf.push(lines[i]); i++; }
       i++; // пропускаем закрывающие ```
+
+      if (lang === "jsxgraph") {
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* некорректный JSON — используем настройки по умолчанию */ }
+        }
+        const id = "jxg-" + Math.random().toString(36).slice(2, 10);
+        if (graphSpecs) graphSpecs.push({ id, options, code: unesc(buf.join("\n")) });
+        out.push('<div id="' + id + '" class="jxg-board"></div>');
+        continue;
+      }
+
+      // сопоставляем частые обозначения с классами языков, которые понимает Prism
+      const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang] || "";
       const codeClass = langClass ? ' class="language-' + langClass + '"' : "";
       out.push("<pre><code" + codeClass + ">" + buf.join("\n") + "</code></pre>");
       continue;
@@ -353,6 +378,34 @@ function slugify(s) {
   const base = s.toLowerCase().split("").map(ch => map[ch] !== undefined ? map[ch] : ch).join("")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
   return (base || "item") + "-" + Date.now().toString(36);
+}
+
+/* ---------------- интерактивные графики (JSXGraph) ---------------- */
+
+function mountGraphs(specs) {
+  // ПРИНИМАЕТ: массив {id, options, code}, собранный renderMd() из блоков ```jsxgraph.
+  // ВЫЗЫВАТЬ ТОЛЬКО ПОСЛЕ того, как соответствующий HTML уже вставлен в DOM —
+  // JSXGraph должен найти div с этим id на странице.
+  if (!specs || !specs.length || !window.JXG) return;
+  for (const spec of specs) {
+    const el = document.getElementById(spec.id);
+    if (!el) continue;
+    try {
+      const board = JXG.JSXGraph.initBoard(spec.id, Object.assign({
+        boundingbox: [-5, 5, 5, -5],
+        axis: true,
+        showCopyright: false,
+        showNavigation: true,
+        keepAspectRatio: true
+      }, spec.options));
+      // spec.code — JS-код автора урока (доверенный, из content/*.js, не пользовательский ввод).
+      // ПРИНИМАЕТ: переменные board (доска JSXGraph) и JXG (сама библиотека) в области видимости.
+      const runner = new Function("board", "JXG", spec.code);
+      runner(board, window.JXG);
+    } catch (e) {
+      el.innerHTML = '<p class="hint">Не удалось построить график: ' + esc(String(e)) + '</p>';
+    }
+  }
 }
 
 /* ---------------- карточки: RemNote / Anki ---------------- */
@@ -551,9 +604,10 @@ function renderLesson(cid, mid, lid) {
   }
   html += '</div>';
 
-  html += '<div class="lesson-content">' + renderMd(lesson.theory || "*Пока пусто — нажми «Редактировать».*") + '</div>';
+  const graphSpecs = [];
+  html += '<div class="lesson-content">' + renderMd(lesson.theory || "*Пока пусто — нажми «Редактировать».*", graphSpecs) + '</div>';
   if (lesson.homework) {
-    html += '<div class="hw-block"><h2>📝 Домашнее задание</h2>' + renderMd(lesson.homework) + '</div>';
+    html += '<div class="hw-block"><h2>📝 Домашнее задание</h2>' + renderMd(lesson.homework, graphSpecs) + '</div>';
   }
   if (lesson.cards && lesson.cards.length) {
     html += '<div class="settings-block"><h2>🃏 Карточки для повторения (' + lesson.cards.length + ')</h2>' +
@@ -569,6 +623,7 @@ function renderLesson(cid, mid, lid) {
 
   app.innerHTML = html;
   if (window.Prism) Prism.highlightAllUnder(app);
+  mountGraphs(graphSpecs);
 
   document.getElementById("doneBtn").onclick = () => {
     const cur = progress[key] || {};
@@ -719,10 +774,11 @@ function renderPracticeProblem() {
   const key = practiceCodeKey(cid, mid, lid, problem.id);
   const savedCode = practiceCode[key];
 
+  const graphSpecs = [];
   const body = document.getElementById("practiceBody");
   body.innerHTML =
     '<div class="practice-layout">' +
-      '<div class="practice-statement">' + renderMd(problem.statement) +
+      '<div class="practice-statement">' + renderMd(problem.statement, graphSpecs) +
         '<div class="practice-tests-list"><h3>Тесты (' + problem.tests.length + ')</h3>' +
         problem.tests.map((t, i) => (
           '<div class="test-case-preview"><b>Тест ' + (i + 1) + '</b><br>' +
@@ -745,6 +801,7 @@ function renderPracticeProblem() {
         '<div id="testResults"></div>' +
       '</div>' +
     '</div>';
+  mountGraphs(graphSpecs);
 
   cmEditor = CodeMirror(document.getElementById("cmHost"), {
     value: savedCode !== undefined ? savedCode : problem.starterCode,
