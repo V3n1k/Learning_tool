@@ -253,13 +253,18 @@ function renderMd(text) {
     const line = lines[i];
 
     // блок кода ```
-    if (/^```/.test(line)) {
+    let fenceMatch;
+    if ((fenceMatch = line.match(/^```(\w+)?/))) {
       closeList();
+      const lang = fenceMatch[1] || "";
+      // сопоставляем частые обозначения с классами языков, которые понимает Prism
+      const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang.toLowerCase()] || "";
       const buf = [];
       i++;
       while (i < lines.length && !/^```/.test(lines[i])) { buf.push(lines[i]); i++; }
       i++; // пропускаем закрывающие ```
-      out.push("<pre><code>" + buf.join("\n") + "</code></pre>");
+      const codeClass = langClass ? ' class="language-' + langClass + '"' : "";
+      out.push("<pre><code" + codeClass + ">" + buf.join("\n") + "</code></pre>");
       continue;
     }
 
@@ -552,6 +557,7 @@ function renderLesson(cid, mid, lid) {
     '</div>';
 
   app.innerHTML = html;
+  if (window.Prism) Prism.highlightAllUnder(app);
 
   document.getElementById("doneBtn").onclick = () => {
     const cur = progress[key] || {};

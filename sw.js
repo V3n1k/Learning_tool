@@ -3,13 +3,20 @@
  * или GitHub Pages. При открытии index.html напрямую (file://) он не нужен —
  * файлы и так локальные. */
 
-const CACHE = "learning-tool-v3";
+const CACHE = "learning-tool-v4";
 
 const ASSETS = [
   "./",
   "./index.html",
   "./css/style.css",
   "./js/app.js",
+  "./js/vendor/prism/prism-core.js",
+  "./js/vendor/prism/prism-clike.js",
+  "./js/vendor/prism/prism-python.js",
+  "./js/vendor/prism/prism-go.js",
+  "./js/vendor/prism/prism-bash.js",
+  "./js/vendor/prism/prism-markup.js",
+  "./js/vendor/prism/prism-tomorrow.css",
   "./content/manifest.js",
   "./content/golang.js",
   "./content/ege-informatika.js",
