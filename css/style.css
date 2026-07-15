@@ -276,7 +276,9 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 /* практика: редактор кода + Pyodide */
 main.app-wide { max-width: 1400px; }
 
-.practice-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.practice-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.practice-tabs #solutionTabBtn { border-color: var(--yellow); color: var(--yellow); margin-left: 6px; }
+.practice-tabs #solutionTabBtn.btn-accent { background: var(--yellow); border-color: var(--yellow); color: #1a1400; }
 
 .practice-layout { display: grid; grid-template-columns: minmax(280px, 420px) 1fr; gap: 20px; align-items: start; }
 @media (max-width: 900px) {

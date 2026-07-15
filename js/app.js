@@ -736,31 +736,64 @@ function renderPractice(cid, mid, lid, practiceIdParam) {
   }
   let activeIdx = lesson.practice.findIndex(p => p.id === practiceIdParam);
   if (activeIdx < 0) activeIdx = 0;
-  practiceCtx = { cid, mid, lid, lesson, activeIdx };
+  practiceCtx = { cid, mid, lid, lesson, activeIdx, solutionMode: false };
 
-  const tabsHtml = lesson.practice.map((p, i) =>
-    '<button class="btn btn-sm ' + (i === activeIdx ? "btn-accent" : "") + '" data-practice-tab="' + i + '">' + esc(p.title) + '</button>'
-  ).join(" ");
+  const lessonUrl = "#/lesson/" + [cid, mid, lid].map(encodeURIComponent).join("/");
 
   let html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' +
-    esc(course.title) + '</a> / <a href="#/lesson/' + [cid, mid, lid].map(encodeURIComponent).join("/") + '">' +
+    esc(course.title) + '</a> / <a href="' + lessonUrl + '">' +
     esc(lesson.title) + '</a> / Практика</div>' +
-    '<div class="page-head"><h1>🧑‍💻 Практика: ' + esc(lesson.title) + '</h1></div>' +
-    '<div class="practice-tabs">' + tabsHtml + '</div>' +
+    '<div class="page-head"><h1>🧑‍💻 Практика: ' + esc(lesson.title) + '</h1>' +
+    '<a class="btn" href="' + lessonUrl + '">← К теории</a></div>' +
+    '<div class="practice-tabs" id="practiceTabs"></div>' +
     '<div id="practiceBody"></div>';
 
   app.innerHTML = html;
-  document.querySelectorAll("[data-practice-tab]").forEach(b => {
-    b.onclick = () => {
-      saveCurrentEditorCode();
-      location.hash = "#/practice/" + [cid, mid, lid, lesson.practice[+b.dataset.practiceTab].id].map(encodeURIComponent).join("/");
-    };
-  });
+  renderTabs();
   renderPracticeProblem();
 }
 
+function renderTabs() {
+  const { lesson, activeIdx, solutionMode } = practiceCtx;
+  const tabsHtml = lesson.practice.map((p, i) =>
+    '<button class="btn btn-sm ' + (i === activeIdx && !solutionMode ? "btn-accent" : "") + '" data-practice-tab="' + i + '">' + esc(p.title) + '</button>'
+  ).join(" ");
+  const problem = lesson.practice[activeIdx];
+  const solutionTab = problem.solution
+    ? ' <button class="btn btn-sm ' + (solutionMode ? "btn-accent" : "") + '" id="solutionTabBtn">💡 Решение</button>'
+    : "";
+  document.getElementById("practiceTabs").innerHTML = tabsHtml + solutionTab;
+
+  document.querySelectorAll("[data-practice-tab]").forEach(b => {
+    b.onclick = () => {
+      const idx = +b.dataset.practiceTab;
+      if (idx === practiceCtx.activeIdx) {
+        // та же задача — просто выходим из режима "Решение" (хэш в URL не меняется,
+        // поэтому переключаемся локально, не дожидаясь события hashchange)
+        if (practiceCtx.solutionMode) {
+          practiceCtx.solutionMode = false;
+          renderTabs();
+          renderPracticeProblem();
+        }
+        return;
+      }
+      saveCurrentEditorCode();
+      const { cid, mid, lid, lesson } = practiceCtx;
+      location.hash = "#/practice/" + [cid, mid, lid, lesson.practice[idx].id].map(encodeURIComponent).join("/");
+    };
+  });
+  const solutionTabBtn = document.getElementById("solutionTabBtn");
+  if (solutionTabBtn) solutionTabBtn.onclick = () => {
+    if (practiceCtx.solutionMode) return;
+    practiceCtx.solutionMode = true;
+    renderTabs();
+    renderPracticeProblem();
+  };
+}
+
 function saveCurrentEditorCode() {
-  if (!cmEditor || !practiceCtx) return;
+  if (!cmEditor || !practiceCtx || practiceCtx.solutionMode) return;
+  // в режиме просмотра решения ничего не сохраняем — иначе затрём код студента эталонным
   const { cid, mid, lid, lesson, activeIdx } = practiceCtx;
   const problem = lesson.practice[activeIdx];
   const key = practiceCodeKey(cid, mid, lid, problem.id);
@@ -769,7 +802,7 @@ function saveCurrentEditorCode() {
 }
 
 function renderPracticeProblem() {
-  const { cid, mid, lid, lesson, activeIdx } = practiceCtx;
+  const { cid, mid, lid, lesson, activeIdx, solutionMode } = practiceCtx;
   const problem = lesson.practice[activeIdx];
   const key = practiceCodeKey(cid, mid, lid, problem.id);
   const savedCode = practiceCode[key];
@@ -786,16 +819,15 @@ function renderPracticeProblem() {
           '<span class="hint">ожидается:</span> <code>' + esc(t.expected) + '</code></div>'
         )).join("") +
         '</div>' +
-        (problem.solution
-          ? '<button class="btn btn-sm" id="revealSolutionBtn">💡 Показать эталонное решение</button>' +
-            '<div class="hidden" id="solutionBlock"><pre><code class="language-python">' + esc(problem.solution) + '</code></pre></div>'
-          : "") +
       '</div>' +
       '<div class="practice-editor-col">' +
+        (solutionMode
+          ? '<p class="hint">💡 Ты смотришь эталонное решение — можно запускать и менять, но это НЕ твой сохранённый код. Нажми вкладку «' + esc(problem.title) + '» ещё раз, чтобы вернуться к своему коду.</p>'
+          : "") +
         '<div id="cmHost" class="cm-host"></div>' +
         '<div class="practice-actions">' +
           '<button class="btn btn-accent" id="runTestsBtn">▶ Запустить на всех тестах</button>' +
-          '<button class="btn" id="resetCodeBtn">↺ Сбросить к заготовке</button>' +
+          (solutionMode ? "" : '<button class="btn" id="resetCodeBtn">↺ Сбросить к заготовке</button>') +
           '<span id="runStatus" class="hint"></span>' +
         '</div>' +
         '<div id="testResults"></div>' +
@@ -804,7 +836,7 @@ function renderPracticeProblem() {
   mountGraphs(graphSpecs);
 
   cmEditor = CodeMirror(document.getElementById("cmHost"), {
-    value: savedCode !== undefined ? savedCode : problem.starterCode,
+    value: solutionMode ? problem.solution : (savedCode !== undefined ? savedCode : problem.starterCode),
     mode: "python",
     theme: "material-darker",
     lineNumbers: true,
@@ -819,13 +851,8 @@ function renderPracticeProblem() {
     saveTimer = setTimeout(saveCurrentEditorCode, 800);
   });
 
-  const revealBtn = document.getElementById("revealSolutionBtn");
-  if (revealBtn) revealBtn.onclick = () => {
-    document.getElementById("solutionBlock").classList.toggle("hidden");
-    if (window.Prism) Prism.highlightAllUnder(document.getElementById("solutionBlock"));
-  };
-
-  document.getElementById("resetCodeBtn").onclick = () => {
+  const resetBtn = document.getElementById("resetCodeBtn");
+  if (resetBtn) resetBtn.onclick = () => {
     if (!confirm("Стереть текущий код и вернуть заготовку?")) return;
     cmEditor.setValue(problem.starterCode);
     saveCurrentEditorCode();
