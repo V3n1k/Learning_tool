@@ -44,20 +44,29 @@
  * Чтобы добавить материал — просто дописываем уроки в нужный файл
  * (или Claude коммитит их в репозиторий, а ты делаешь git pull).
  *
- * ИНТЕРАКТИВНЫЕ ГРАФИКИ/ЧЕРТЕЖИ (JSXGraph, как GeoGebra) — прямо в тексте theory/homework/
- * practice[].statement можно вставить блок с уникальным языком "jsxgraph":
+ * ИНТЕРАКТИВНЫЕ ГРАФИКИ/ЧЕРТЕЖИ (настоящая GeoGebra, грузится с geogebra.org —
+ * НУЖЕН ИНТЕРНЕТ) — прямо в тексте theory/homework/practice[].statement можно
+ * вставить блок с уникальным языком "geogebra":
  *
- *   ```jsxgraph {"boundingbox":[-6,6,6,-6],"axis":true}
- *   board.create('functiongraph', [x => x*x]);
- *   board.create('point', [1, 1], {name:'A'});
+ *   ```geogebra {"appName":"geometry","showAlgebraInput":true}
+ *   A=(0,0)
+ *   B=(4,0)
+ *   C=(4,3)
+ *   Polygon(A,B,C)
+ *   a=Slider(-5,5,0.1)
  *   ```
  *
- * Первая строка после ```jsxgraph — необязательный JSON с настройками доски
- * (boundingbox: [xMin,yMax,xMax,yMin], axis: показывать ли оси и т.д.).
- * Дальше — обычный JS-код, который выполняется с переменными `board` (доска
- * JSXGraph) и `JXG` (сама библиотека) в области видимости. Полный список
- * примитивов — в документации JSXGraph (point, line, segment, circle,
- * functiongraph, polygon, angle, slider и т.д.).
+ * Первая строка после ```geogebra — необязательный JSON с настройками апплета
+ * (appName: "geometry"|"classic"|"graphing"|"3d", showAlgebraInput/showToolBar:
+ * bool, width/height в пикселях, coordSystem: [xMin,xMax,yMin,yMax] — задать
+ * видимую область; НЕ используй команду "SetCoordSystem(...)" строкой — её нет
+ * в словаре app "geometry", только через этот JSON-параметр). Дальше — каждая
+ * строка это отдельная команда GeoGebra (выполняется через api.evalCommand),
+ * см. синтаксис команд на geogebra.org/manual. Блок в тексте становится
+ * кликабельной плашкой «📐 Открыть график N →» — сам апплет рисуется в панели
+ * справа от текста урока (или внутри statement на странице практики), полностью
+ * интерактивный: перетаскивание точек, слайдеры, свой ввод в поле алгебры.
+ * Строки, начинающиеся с "#", — комментарии и пропускаются.
  */
 window.LT_CONTENT = [];
 window.LT_REGISTER = function (course) { window.LT_CONTENT.push(course); };

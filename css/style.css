@@ -171,12 +171,36 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 .lesson-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 .lesson-content img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); margin: 10px 0; display: block; }
 
-/* интерактивные графики JSXGraph */
-.jxg-board {
-  width: 100%; max-width: 520px; aspect-ratio: 1 / 1;
-  margin: 14px 0; border-radius: 10px; border: 1px solid var(--border);
-  background: #fff; /* JSXGraph рисует на белом фоне независимо от темы сайта — так читабельнее */
+/* урок с графиками: текст слева, "рельса" с апплетами GeoGebra справа (sticky) */
+.lesson-split { display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: 24px; align-items: start; }
+.lesson-main { min-width: 0; }
+.lesson-graphs-rail { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 900px) {
+  .lesson-split { grid-template-columns: 1fr; }
+  .lesson-graphs-rail { position: static; }
 }
+
+/* плашка-ссылка в тексте на график в боковой панели */
+a.graph-ref {
+  display: inline-block; cursor: pointer; background: rgba(122, 162, 247, 0.12);
+  border: 1px solid var(--accent2); color: var(--accent2);
+  padding: 3px 12px; border-radius: 8px; font-size: 0.9em; font-weight: 600; text-decoration: none;
+}
+a.graph-ref:hover { background: rgba(122, 162, 247, 0.22); }
+
+/* интерактивные графики (настоящая GeoGebra, апплет с geogebra.org) */
+.ggb-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px; transition: box-shadow .3s, border-color .3s; overflow-x: auto;
+}
+.ggb-card-label { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px; font-weight: 600; }
+.ggb-board {
+  width: 100%; height: 400px; border-radius: 8px; overflow: hidden;
+  background: #fff; /* GeoGebra рисует на белом фоне независимо от темы сайта — так читабельнее */
+}
+/* важно: контейнер не должен быть уже ~420px — при меньшей ширине GeoGebra
+   (appName "geometry") переходит в компактный режим и молча прячет слайдеры */
+.ggb-card-flash { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.28); }
 
 /* блок ДЗ */
 .hw-block {
