@@ -721,7 +721,10 @@ function renderCourse(cid) {
     '<span>' + pr.done + ' из ' + pr.total + ' уроков · ' + pr.pct + '%</span></div>';
 
   if (course.theory && course.theory.length) {
-    html += '<a class="btn btn-accent" style="margin-bottom:20px;display:inline-block" href="#/theory-all/' + encodeURIComponent(course.id) + '">📚 Полная шпаргалка по курсу (вся теория)</a>';
+    // счётчик считается на лету от course.theory/course.modules — при добавлении
+    // новых тем теории отдельно ничего руками обновлять не нужно
+    const topicsCovered = course.modules.filter(m => findTheoryPage(course, m.id)).length;
+    html += '<a class="btn btn-accent" style="margin-bottom:20px;display:inline-block" href="#/theory-all/' + encodeURIComponent(course.id) + '">📚 Полная шпаргалка по курсу (теория: ' + topicsCovered + ' из ' + course.modules.length + ' тем)</a>';
   }
 
   if (!course.modules.length) html += '<p class="empty">Пока нет модулей — добавь первый.</p>';
@@ -853,8 +856,10 @@ function renderTheoryAll(cid) {
   const bodyHtml = '<div class="lesson-content theory-content">' +
     course.theory.map(p => theoryPageHtml(p, graphSpecs)).join('<hr>') +
     '</div>';
+  const totalItems = course.theory.reduce((s, p) => s + (p.items || []).length, 0);
   let html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' + esc(course.title) + '</a> / Шпаргалка</div>' +
-    '<div class="page-head"><h1>📚 Полная шпаргалка: ' + esc(course.title) + '</h1></div>' +
+    '<div class="page-head"><h1>📚 Полная шпаргалка: ' + esc(course.title) + '</h1>' +
+    '<span class="hint" style="color:var(--text-dim)">' + course.theory.length + ' тем · ' + totalItems + ' пунктов теории</span></div>' +
     '<div class="theory-toc"><b>Содержание:</b> ' +
     course.theory.map(p => '<a class="theory-toc-link" data-scroll-to="theory-page-' + esc(p.id) + '">' + esc(p.title) + '</a>').join(' · ') +
     '</div>' +
