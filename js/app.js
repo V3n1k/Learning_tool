@@ -445,6 +445,8 @@ function graphRailHtml(specs) {
 }
 
 const geogebraRegistry = new Map(); // id спека -> {id, options, commands, n}, для ленивой отрисовки апплета
+const geogebraApi = new Map(); // id спека -> live GGBApplet API, для Ctrl+Z (см. wireGraphUndo)
+let hoveredGraphId = null;
 
 function mountGeogebra(specs) {
   // ВЫЗЫВАТЬ ТОЛЬКО ПОСЛЕ того, как соответствующий HTML (из graphRailHtml) уже вставлен в DOM.
@@ -453,6 +455,7 @@ function mountGeogebra(specs) {
   if (!specs || !specs.length) return;
   for (const spec of specs) geogebraRegistry.set(spec.id, spec);
   wireGraphToggles();
+  wireGraphUndo();
 }
 
 function mountGeogebraOne(spec) {
@@ -476,6 +479,13 @@ function mountGeogebraOne(spec) {
     enableRightClick: false,
     language: "ru",
     appletOnLoad: function (api) {
+      geogebraApi.set(spec.id, api); // используется в wireGraphUndo() для Ctrl+Z наведённого графика
+      // api.undo() молча ничего не делает, пока в конструкции не был "активирован"
+      // менеджер истории — эмпирически (см. scratchpad/check_undo*.js) он включается
+      // побочным эффектом от registerStoreUndoListener(), и включить его нужно ДО
+      // того, как пользователь начнёт тащить точку, иначе именно это перетаскивание
+      // не попадёт в историю и Ctrl+Z будет работать "не с первого раза".
+      try { api.registerStoreUndoListener(function () {}); } catch (e) { /* игнорируем */ }
       // И "3d", и "geometry" по умолчанию показывают ещё и панель Алгебры (список
       // созданных объектов) поверх/под самим видом — в узкой карточке рельсы это
       // разваливает layout: большая пустая область + обрезанные строки переменных
@@ -534,6 +544,36 @@ function wireGraphToggles() {
       else openGraphCard(id);
     };
   });
+}
+
+function wireGraphUndo() {
+  // Ctrl+Z (Cmd+Z на Mac) отменяет последнее действие (перетаскивание точки и т.п.)
+  // в графике, над которым сейчас курсор — GGBApplet.undo() работает независимо от
+  // видимости тулбара, просто нет штатной кнопки/сочетания клавиш без него.
+  document.querySelectorAll(".ggb-board").forEach(el => {
+    if (el._hoverWired) return;
+    el._hoverWired = true;
+    el.addEventListener("mouseenter", () => { hoveredGraphId = el.id; });
+    el.addEventListener("mouseleave", () => { if (hoveredGraphId === el.id) hoveredGraphId = null; });
+  });
+}
+
+if (!window._ggbUndoWired) {
+  window._ggbUndoWired = true;
+  // capture-фаза (третий аргумент true) — GeoGebra сама вешает обработчик Ctrl+Z на
+  // свои внутренние элементы и останавливает всплытие; ловим событие раньше неё,
+  // на пути "вниз" от document к цели, иначе наш обработчик на document просто не
+  // получит событие.
+  document.addEventListener("keydown", (e) => {
+    if (!hoveredGraphId) return;
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === "z") {
+      const api = geogebraApi.get(hoveredGraphId);
+      if (api) { e.preventDefault(); try { api.undo(); } catch (err) { /* игнорируем */ } }
+    } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === "y" || (e.shiftKey && e.key.toLowerCase() === "z"))) {
+      const api = geogebraApi.get(hoveredGraphId);
+      if (api) { e.preventDefault(); try { api.redo(); } catch (err) { /* игнорируем */ } }
+    }
+  }, true);
 }
 
 function wireGraphRefs(container) {
