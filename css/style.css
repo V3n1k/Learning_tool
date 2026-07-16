@@ -160,11 +160,14 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 .hw-block a.task-link:hover, .lesson-content a.task-link:hover {
   background: rgba(224, 176, 76, 0.26); text-decoration: none;
 }
-.lesson-content pre {
+.lesson-content pre, .theory-card pre {
   background: #12141b; border: 1px solid var(--border);
   padding: 14px 16px; border-radius: 10px; overflow-x: auto; margin: 12px 0;
 }
-.lesson-content pre code { background: none; padding: 0; color: #d7dae5; font-size: 0.85rem; line-height: 1.6; }
+.lesson-content pre code, .theory-card pre code { background: none; padding: 0; color: #d7dae5; font-size: 0.85rem; line-height: 1.6; }
+/* карточки в узкой рельсе (460px) — код длиннее ширины карточки не обрезается
+   молча родительским overflow-x:hidden у .lesson-rail-col, а скроллится сам */
+.theory-card pre code { font-size: 0.78rem; }
 .lesson-content table { border-collapse: collapse; margin: 12px 0; width: 100%; }
 .lesson-content th, .lesson-content td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; font-size: 0.9rem; }
 .lesson-content th { background: var(--bg3); }
