@@ -476,6 +476,14 @@ function mountGeogebraOne(spec) {
     enableRightClick: false,
     language: "ru",
     appletOnLoad: function (api) {
+      // appName "3d" по умолчанию показывает панель Алгебры (сверстанную поверх/под
+      // самим 3D-видом — в узкой карточке рельсы это разваливает layout: большая
+      // пустая область + обрезанные строки переменных). "T" — код перспективы
+      // "только 3D-вид", подобран эмпирически (см. ggb_persp_test.html), других
+      // кодов вроде "5"/"G"/"3D" в API-доке нет.
+      if (spec.options.appName === "3d") {
+        try { api.setPerspective("T"); } catch (e) { /* игнорируем */ }
+      }
       // spec.commands — GeoGebra-команды автора урока (доверенные, из content/*.js).
       for (const cmd of spec.commands) {
         try { api.evalCommand(cmd); } catch (e) { /* пропускаем некорректную отдельную команду, не рушим весь график */ }
