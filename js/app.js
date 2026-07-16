@@ -186,7 +186,7 @@ function effectiveContent() {
   const result = [];
   for (const src of (window.LT_CONTENT || [])) {
     if (isDeleted(src.id)) continue;
-    const course = { id: src.id, title: src.title, color: src.color, description: src.description, builtin: true, modules: [] };
+    const course = { id: src.id, title: src.title, color: src.color, description: src.description, builtin: true, modules: [], theory: src.theory || [] };
     const srcModules = (src.modules || []).concat(user.addModules[src.id] || []);
     for (const m of srcModules) {
       const mKey = keyOf(src.id, m.id);
@@ -203,7 +203,8 @@ function effectiveContent() {
           theory: ov.theory !== undefined ? ov.theory : (l.theory || ""),
           homework: ov.homework !== undefined ? ov.homework : (l.homework || ""),
           cards: ov.cards !== undefined ? ov.cards : (l.cards || []),
-          practice: l.practice || []
+          practice: l.practice || [],
+          theoryRefs: l.theoryRefs || []
         });
       }
       course.modules.push(mod);
@@ -218,6 +219,26 @@ function effectiveContent() {
 }
 
 function findCourse(courses, cid) { return courses.find(c => c.id === cid); }
+
+/* ---------------- «сухая теория»: страница на модуль + сводная шпаргалка ----------------
+ * course.theory — массив { id (= id модуля, к которому привязана страница), title, items: [{id, title, body}] }.
+ * Урок ссылается на конкретные пункты через lesson.theoryRefs: ["moduleTheoryId:itemId", ...] —
+ * это и подсвечивается в правой панели урока (см. theoryRailHtml). */
+
+function findTheoryPage(course, pageId) {
+  return (course.theory || []).find(p => p.id === pageId);
+}
+
+function findTheoryItem(course, ref) {
+  // ПРИНИМАЕТ: строку вида "moduleId:itemId". ВОЗВРАЩАЕТ: {page, item} или null, если не найдено.
+  const sep = ref.indexOf(":");
+  if (sep < 0) return null;
+  const pageId = ref.slice(0, sep), itemId = ref.slice(sep + 1);
+  const page = findTheoryPage(course, pageId);
+  if (!page) return null;
+  const item = (page.items || []).find(i => i.id === itemId);
+  return item ? { page, item } : null;
+}
 
 function flatLessons(course) {
   const out = [];
@@ -534,6 +555,10 @@ function route() {
     markNav("settings"); renderSettings();
   } else if (parts[0] === "course" && parts[1]) {
     markNav("home"); renderCourse(parts[1]);
+  } else if (parts[0] === "theory-all" && parts[1]) {
+    markNav("home"); renderTheoryAll(parts[1]);
+  } else if (parts[0] === "theory" && parts[1] && parts[2]) {
+    markNav("home"); renderTheoryPage(parts[1], parts[2], parts[3]);
   } else if (parts[0] === "lesson" && parts.length >= 4) {
     markNav("home"); renderLesson(parts[1], parts[2], parts[3]);
   } else if (parts[0] === "practice" && parts.length >= 4) {
@@ -598,11 +623,17 @@ function renderCourse(cid) {
     '<div class="progress-row" style="margin-bottom:20px"><div class="progress"><div style="width:' + pr.pct + '%"></div></div>' +
     '<span>' + pr.done + ' из ' + pr.total + ' уроков · ' + pr.pct + '%</span></div>';
 
+  if (course.theory && course.theory.length) {
+    html += '<a class="btn btn-accent" style="margin-bottom:20px;display:inline-block" href="#/theory-all/' + encodeURIComponent(course.id) + '">📚 Полная шпаргалка по курсу (вся теория)</a>';
+  }
+
   if (!course.modules.length) html += '<p class="empty">Пока нет модулей — добавь первый.</p>';
 
   for (const m of course.modules) {
+    const theoryPage = findTheoryPage(course, m.id);
     html += '<div class="module open" data-mid="' + esc(m.id) + '">' +
       '<div class="module-head"><span class="chev">▶</span><h3>' + esc(m.title) + '</h3>' +
+      (theoryPage ? '<a class="btn btn-sm" href="#/theory/' + encodeURIComponent(course.id) + '/' + encodeURIComponent(m.id) + '" title="Сухая теория по модулю: определения, теоремы, формулы">📖 Теория</a>' : '') +
       '<button class="btn btn-sm" data-add-lesson="' + esc(m.id) + '">＋ Урок</button>' +
       '<button class="btn btn-sm btn-danger" data-del-module="' + esc(m.id) + '">✕</button></div>' +
       '<div class="module-lessons">';
@@ -622,7 +653,7 @@ function renderCourse(cid) {
 
   document.querySelectorAll(".module-head").forEach(head => {
     head.addEventListener("click", e => {
-      if (e.target.closest("button")) return;
+      if (e.target.closest("button") || e.target.closest("a")) return;
       head.parentElement.classList.toggle("open");
     });
   });
@@ -647,6 +678,81 @@ function renderCourse(cid) {
       renderCourse(course.id);
     };
   });
+}
+
+/* ---------------- страница: сухая теория (по модулю / вся сразу) ----------------
+ * Это НЕ уроки ЕГЭ-курса — здесь определения/теоремы/формулы сами по себе,
+ * без привязки к номеру задания или формату экзамена. Источник — учебники (см. papka
+ * textbooks/ в корне проекта, не коммитится). Уроки ссылаются на конкретные пункты
+ * через lesson.theoryRefs — см. theoryRailHtml(). */
+
+function theoryPageHtml(page) {
+  // ПРИНИМАЕТ: одну страницу теории {id, title, items}. ВОЗВРАЩАЕТ: HTML со всеми её пунктами.
+  let html = '<h2 id="theory-page-' + esc(page.id) + '">' + esc(page.title) + '</h2>';
+  for (const item of (page.items || [])) {
+    html += '<div class="theory-item" id="theory-item-' + esc(page.id) + '-' + esc(item.id) + '">' +
+      '<h3>' + esc(item.title) + '</h3>' +
+      renderMd(item.body || "") +
+      '</div>';
+  }
+  return html;
+}
+
+function theoryRailHtml(course, refs) {
+  // ПРИНИМАЕТ: курс и массив строк "moduleTheoryId:itemId" (lesson.theoryRefs).
+  // ВОЗВРАЩАЕТ: HTML карточек — компактный текст теоремы/формулы + ссылка на полную страницу теории.
+  const resolved = (refs || []).map(r => findTheoryItem(course, r)).filter(Boolean);
+  if (!resolved.length) return "";
+  return '<div class="theory-rail">' +
+    '<div class="theory-rail-label">📖 Теоремы и формулы урока</div>' +
+    resolved.map(({ page, item }) =>
+      '<div class="theory-card">' +
+        '<div class="theory-card-title">' + esc(item.title) + '</div>' +
+        renderMd(item.body || "") +
+        '<a class="theory-card-link" href="#/theory/' + encodeURIComponent(course.id) + '/' + encodeURIComponent(page.id) + '/' + encodeURIComponent(item.id) + '">вся тема «' + esc(page.title) + '» →</a>' +
+      '</div>'
+    ).join("") +
+    '</div>';
+}
+
+function renderTheoryPage(cid, pageId, focusItemId) {
+  const courses = effectiveContent();
+  const course = findCourse(courses, cid);
+  const page = course && findTheoryPage(course, pageId);
+  if (!course || !page) { app.innerHTML = '<p class="empty">Страница теории не найдена. <a href="#/course/' + encodeURIComponent(cid) + '">Назад к курсу</a></p>'; return; }
+
+  const html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' + esc(course.title) + '</a> / Теория</div>' +
+    '<div class="page-head"><h1>📖 ' + esc(page.title) + '</h1>' +
+    '<a class="btn btn-sm" href="#/theory-all/' + encodeURIComponent(cid) + '">Вся шпаргалка курса →</a></div>' +
+    '<p class="hint" style="margin-bottom:20px">Сухая теория: определения, теоремы, формулы — без привязки к формату экзамена. Примеры и разбор заданий — в уроках модуля.</p>' +
+    '<div class="lesson-content theory-content">' + theoryPageHtml(page) + '</div>';
+  app.innerHTML = html;
+  if (window.Prism) Prism.highlightAllUnder(app);
+  if (focusItemId) {
+    const el = document.getElementById("theory-item-" + page.id + "-" + focusItemId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("theory-item-flash");
+      setTimeout(() => el.classList.remove("theory-item-flash"), 1600);
+    }
+  }
+}
+
+function renderTheoryAll(cid) {
+  const courses = effectiveContent();
+  const course = findCourse(courses, cid);
+  if (!course || !course.theory || !course.theory.length) { app.innerHTML = '<p class="empty">Для этого курса шпаргалка пока не готова. <a href="#/course/' + encodeURIComponent(cid) + '">Назад к курсу</a></p>'; return; }
+
+  let html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' + esc(course.title) + '</a> / Шпаргалка</div>' +
+    '<div class="page-head"><h1>📚 Полная шпаргалка: ' + esc(course.title) + '</h1></div>' +
+    '<div class="theory-toc"><b>Содержание:</b> ' +
+    course.theory.map(p => '<a href="#theory-page-' + esc(p.id) + '">' + esc(p.title) + '</a>').join(' · ') +
+    '</div>' +
+    '<div class="lesson-content theory-content">' +
+    course.theory.map(theoryPageHtml).join('<hr>') +
+    '</div>';
+  app.innerHTML = html;
+  if (window.Prism) Prism.highlightAllUnder(app);
 }
 
 /* ---------------- страница: урок ---------------- */
@@ -698,8 +804,10 @@ function renderLesson(cid, mid, lid) {
       '<button class="btn" id="cardsAnkiBtn">📋 Для Anki (TSV)</button></div>';
   }
 
-  if (graphSpecs.length) {
-    html += '<div class="lesson-split"><div class="lesson-main">' + mainHtml + '</div>' + graphRailHtml(graphSpecs) + '</div>';
+  const theoryRail = theoryRailHtml(course, lesson.theoryRefs);
+  if (graphSpecs.length || theoryRail) {
+    html += '<div class="lesson-split"><div class="lesson-main">' + mainHtml + '</div>' +
+      '<div class="lesson-rail-col">' + theoryRail + graphRailHtml(graphSpecs) + '</div></div>';
   } else {
     html += mainHtml;
   }
@@ -709,7 +817,7 @@ function renderLesson(cid, mid, lid) {
     (next ? '<a class="btn" href="#/lesson/' + [cid, next.mod.id, next.lesson.id].map(encodeURIComponent).join("/") + '">' + esc(next.lesson.title) + ' →</a>' : '<span></span>') +
     '</div>';
 
-  app.classList.toggle("app-wide", graphSpecs.length > 0);
+  app.classList.toggle("app-wide", graphSpecs.length > 0 || !!theoryRail);
   app.innerHTML = html;
   if (window.Prism) Prism.highlightAllUnder(app);
   mountGeogebra(graphSpecs);

@@ -171,13 +171,16 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 .lesson-content hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 .lesson-content img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); margin: 10px 0; display: block; }
 
-/* урок с графиками: текст слева, "рельса" с апплетами GeoGebra справа (sticky) */
+/* урок с графиками и/или теорией: текст слева, "рельса" справа (sticky) —
+   .lesson-rail-col держит sticky-позицию, .theory-rail/.lesson-graphs-rail — просто
+   стопки карточек внутри неё (могут присутствовать одновременно) */
 .lesson-split { display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: 24px; align-items: start; }
 .lesson-main { min-width: 0; }
-.lesson-graphs-rail { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 16px; }
+.lesson-rail-col { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 20px; }
+.lesson-graphs-rail, .theory-rail { display: flex; flex-direction: column; gap: 16px; }
 @media (max-width: 900px) {
   .lesson-split { grid-template-columns: 1fr; }
-  .lesson-graphs-rail { position: static; }
+  .lesson-rail-col { position: static; }
 }
 
 /* плашка-ссылка в тексте на график в боковой панели */
@@ -201,6 +204,28 @@ a.graph-ref:hover { background: rgba(122, 162, 247, 0.22); }
 /* важно: контейнер не должен быть уже ~420px — при меньшей ширине GeoGebra
    (appName "geometry") переходит в компактный режим и молча прячет слайдеры */
 .ggb-card-flash { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.28); }
+
+/* карточки теоремы/формулы в боковой панели урока (theoryRailHtml) */
+.theory-rail-label { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
+.theory-card {
+  background: var(--bg2); border: 1px solid var(--accent2); border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.theory-card-title { color: var(--accent2); font-weight: 700; margin-bottom: 6px; }
+.theory-card p { margin: 6px 0; font-size: 0.92rem; }
+.theory-card-link { display: inline-block; margin-top: 8px; font-size: 0.85rem; }
+
+/* страница "сухая теория" — курсивный подзаголовок каждого пункта, пошире межстрочный */
+.theory-content .theory-item { margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
+.theory-content .theory-item:last-child { border-bottom: none; }
+.theory-content h3 { color: var(--yellow); }
+.theory-item-flash { animation: theory-flash 1.6s ease; }
+@keyframes theory-flash {
+  0%, 100% { background: transparent; }
+  20% { background: rgba(224, 176, 76, 0.18); }
+}
+.theory-toc { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; line-height: 1.9; }
+.theory-toc a { margin-right: 4px; }
 
 /* блок ДЗ */
 .hw-block {
