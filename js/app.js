@@ -429,72 +429,112 @@ function slugify(s) {
 function graphRailHtml(specs) {
   // ПРИНИМАЕТ: массив {id, options, commands, n}, собранный renderMd() из блоков ```geogebra.
   // ВОЗВРАЩАЕТ: HTML боковой панели (пусто, если графиков в уроке нет).
+  // Карточки свёрнуты по умолчанию (как модули в списке тем курса) — иначе при
+  // нескольких графиках рельса становится намного длиннее текста урока и уезжает
+  // из синхронизации со скроллом; свёрнутый вид также экономит место под сам
+  // апплет, когда его всё-таки раскрывают.
   if (!specs || !specs.length) return "";
   return '<div class="lesson-graphs-rail">' + specs.map(spec =>
     '<div class="ggb-card" id="card-' + spec.id + '">' +
-      '<div class="ggb-card-label">📐 График ' + spec.n + '</div>' +
-      '<div id="' + spec.id + '" class="ggb-board"></div>' +
+      '<div class="ggb-card-head" data-graph-toggle="' + spec.id + '">' +
+        '<span class="chev">▶</span><span class="ggb-card-label">📐 График ' + spec.n + '</span>' +
+      '</div>' +
+      '<div class="ggb-card-body"><div id="' + spec.id + '" class="ggb-board"></div></div>' +
     '</div>'
   ).join("") + '</div>';
 }
 
+const geogebraRegistry = new Map(); // id спека -> {id, options, commands, n}, для ленивой отрисовки апплета
+
 function mountGeogebra(specs) {
   // ВЫЗЫВАТЬ ТОЛЬКО ПОСЛЕ того, как соответствующий HTML (из graphRailHtml) уже вставлен в DOM.
+  // Сам GGBApplet не создаётся здесь — только регистрируется и будет инициализирован
+  // при первом раскрытии карточки (mountGeogebraOne), чтобы не грузить сразу N апплетов.
   if (!specs || !specs.length) return;
+  for (const spec of specs) geogebraRegistry.set(spec.id, spec);
+  wireGraphToggles();
+}
+
+function mountGeogebraOne(spec) {
+  const el = document.getElementById(spec.id);
+  if (!el || el.dataset.mounted) return;
+  el.dataset.mounted = "1";
   if (!window.GGBApplet) {
-    for (const spec of specs) {
-      const el = document.getElementById(spec.id);
-      if (el) el.innerHTML = '<p class="hint">GeoGebra не загрузилась — нужен интернет (график грузится с geogebra.org).</p>';
-    }
+    el.innerHTML = '<p class="hint">GeoGebra не загрузилась — нужен интернет (график грузится с geogebra.org).</p>';
     return;
   }
-  for (const spec of specs) {
-    const el = document.getElementById(spec.id);
-    if (!el) continue;
-    const params = Object.assign({
-      appName: "geometry",
-      // минимум ~420 — при более узком контейнере GeoGebra ("geometry") молча
-      // прячет слайдеры (компактный режим), см. комментарий в style.css у .ggb-board
-      width: Math.max(el.clientWidth || 0, 420),
-      height: 400,
-      showToolBar: false,
-      showAlgebraInput: false,
-      showMenuBar: false,
-      showResetIcon: true,
-      enableRightClick: false,
-      language: "ru",
-      appletOnLoad: function (api) {
-        // spec.commands — GeoGebra-команды автора урока (доверенные, из content/*.js).
-        for (const cmd of spec.commands) {
-          try { api.evalCommand(cmd); } catch (e) { /* пропускаем некорректную отдельную команду, не рушим весь график */ }
-        }
-        // "SetCoordSystem" как строковая команда не входит в словарь app "geometry" —
-        // границы видимой области задаются отдельно, через options.coordSystem: [xMin,xMax,yMin,yMax]
-        if (Array.isArray(spec.options.coordSystem) && spec.options.coordSystem.length === 4) {
-          try { api.setCoordSystem(...spec.options.coordSystem); } catch (e) { /* игнорируем */ }
-        }
+  const params = Object.assign({
+    appName: "geometry",
+    // минимум ~420 — при более узком контейнере GeoGebra ("geometry") молча
+    // прячет слайдеры (компактный режим), см. комментарий в style.css у .ggb-board
+    width: Math.max(el.clientWidth || 0, 420),
+    height: 460,
+    showToolBar: false,
+    showAlgebraInput: false,
+    showMenuBar: false,
+    showResetIcon: true,
+    enableRightClick: false,
+    language: "ru",
+    appletOnLoad: function (api) {
+      // spec.commands — GeoGebra-команды автора урока (доверенные, из content/*.js).
+      for (const cmd of spec.commands) {
+        try { api.evalCommand(cmd); } catch (e) { /* пропускаем некорректную отдельную команду, не рушим весь график */ }
       }
-    }, spec.options);
-    try {
-      new GGBApplet(params, true).inject(spec.id);
-    } catch (e) {
-      el.innerHTML = '<p class="hint">Не удалось построить график: ' + esc(String(e)) + '</p>';
+      // "SetCoordSystem" как строковая команда не входит в словарь app "geometry" —
+      // границы видимой области задаются отдельно, через options.coordSystem: [xMin,xMax,yMin,yMax]
+      if (Array.isArray(spec.options.coordSystem) && spec.options.coordSystem.length === 4) {
+        try { api.setCoordSystem(...spec.options.coordSystem); } catch (e) { /* игнорируем */ }
+      }
     }
+  }, spec.options);
+  try {
+    new GGBApplet(params, true).inject(spec.id);
+  } catch (e) {
+    el.innerHTML = '<p class="hint">Не удалось построить график: ' + esc(String(e)) + '</p>';
   }
 }
 
+function openGraphCard(id) {
+  const card = document.getElementById("card-" + id);
+  if (!card) return null;
+  if (!card.classList.contains("open")) {
+    card.classList.add("open");
+    const spec = geogebraRegistry.get(id);
+    if (spec) mountGeogebraOne(spec);
+  }
+  return card;
+}
+
+function wireGraphToggles() {
+  document.querySelectorAll("[data-graph-toggle]").forEach(head => {
+    if (head._wired) return;
+    head._wired = true;
+    head.onclick = () => {
+      const id = head.dataset.graphToggle;
+      const card = document.getElementById("card-" + id);
+      if (!card) return;
+      if (card.classList.contains("open")) card.classList.remove("open");
+      else openGraphCard(id);
+    };
+  });
+}
+
 function wireGraphRefs(container) {
-  // клик по плашке "Открыть график N →" в тексте — прокручивает и подсвечивает
-  // соответствующую карточку в боковой панели (без изменения location.hash,
-  // чтобы не сбить роутер).
+  // клик по плашке "Открыть график N →" в тексте — раскрывает (если свёрнута) и
+  // прокручивает/подсвечивает соответствующую карточку в боковой панели (без
+  // изменения location.hash, чтобы не сбить роутер).
   container.querySelectorAll("[data-graph-ref]").forEach(a => {
     a.onclick = (e) => {
       e.preventDefault();
-      const card = document.getElementById("card-" + a.dataset.graphRef);
+      const card = openGraphCard(a.dataset.graphRef);
       if (!card) return;
-      card.scrollIntoView({ behavior: "smooth", block: "center" });
-      card.classList.add("ggb-card-flash");
-      setTimeout(() => card.classList.remove("ggb-card-flash"), 1200);
+      // ждём кадр — карточка только что раскрылась и получила реальную высоту;
+      // scrollIntoView до этого целится в её старую (свёрнутую) позицию
+      requestAnimationFrame(() => {
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        card.classList.add("ggb-card-flash");
+        setTimeout(() => card.classList.remove("ggb-card-flash"), 1200);
+      });
     };
   });
 }
