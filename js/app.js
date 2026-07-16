@@ -327,7 +327,10 @@ function renderMd(text, graphSpecs) {
         const id = "ggb-" + Math.random().toString(36).slice(2, 10);
         const n = graphSpecs ? graphSpecs.length + 1 : 0;
         if (graphSpecs) graphSpecs.push({ id, options, commands, n });
-        out.push('<p><a class="graph-ref" data-graph-ref="' + id + '">📐 Открыть график ' + n + ' →</a></p>');
+        // options.title (необязательный) — короткое человеческое название графика
+        // ("Куб", "Угол между касательной и хордой" и т.п.) вместо голого "График N"
+        const chipText = options.title ? esc(options.title) : "Открыть график " + n;
+        out.push('<p><a class="graph-ref" data-graph-ref="' + id + '">📐 ' + chipText + ' →</a></p>');
         continue;
       }
 
@@ -434,14 +437,15 @@ function graphRailHtml(specs) {
   // из синхронизации со скроллом; свёрнутый вид также экономит место под сам
   // апплет, когда его всё-таки раскрывают.
   if (!specs || !specs.length) return "";
-  return '<div class="lesson-graphs-rail">' + specs.map(spec =>
-    '<div class="ggb-card" id="card-' + spec.id + '">' +
+  return '<div class="lesson-graphs-rail">' + specs.map(spec => {
+    const label = "График " + spec.n + (spec.options.title ? " — " + esc(spec.options.title) : "");
+    return '<div class="ggb-card" id="card-' + spec.id + '">' +
       '<div class="ggb-card-head" data-graph-toggle="' + spec.id + '">' +
-        '<span class="chev">▶</span><span class="ggb-card-label">📐 График ' + spec.n + '</span>' +
+        '<span class="chev">▶</span><span class="ggb-card-label">📐 ' + label + '</span>' +
       '</div>' +
       '<div class="ggb-card-body"><div id="' + spec.id + '" class="ggb-board"></div></div>' +
-    '</div>'
-  ).join("") + '</div>';
+    '</div>';
+  }).join("") + '</div>';
 }
 
 const geogebraRegistry = new Map(); // id спека -> {id, options, commands, n}, для ленивой отрисовки апплета
