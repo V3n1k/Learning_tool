@@ -144,7 +144,7 @@ S = Sосн + Sбок
           body: `
 ## Числовая окружность: откуда берутся cos t и sin t
 
-\`\`\`geogebra {"appName":"geometry","coordSystem":[-1.6,1.6,-1.6,1.6],"showAlgebraInput":false}
+\`\`\`geogebra {"appName":"geometry","coordSystem":[-1.6,1.6,-1.6,1.6],"showAlgebraInput":false,"showAxes":true}
 O=(0,0)
 A=(1,0)
 t=Slider(0,2*pi,0.02)

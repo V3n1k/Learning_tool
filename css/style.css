@@ -173,14 +173,21 @@ main { max-width: 980px; margin: 0 auto; padding: 24px 20px 80px; }
 
 /* урок с графиками и/или теорией: текст слева, "рельса" справа (sticky) —
    .lesson-rail-col держит sticky-позицию, .theory-rail/.lesson-graphs-rail — просто
-   стопки карточек внутри неё (могут присутствовать одновременно) */
+   стопки карточек внутри неё (могут присутствовать одновременно).
+   У самой рельсы своя прокрутка (overflow-y: auto, ограничена высотой окна) —
+   так раскрытые графики скроллятся отдельно от текста урока и не тянут за
+   собой всю страницу вниз, когда рельса становится длиннее видимой области. */
 .lesson-split { display: grid; grid-template-columns: minmax(0, 1fr) 460px; gap: 24px; align-items: start; }
 .lesson-main { min-width: 0; }
-.lesson-rail-col { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 20px; }
+.lesson-rail-col {
+  position: sticky; top: 88px; max-height: calc(100vh - 104px);
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column; gap: 20px; padding-right: 6px;
+}
 .lesson-graphs-rail, .theory-rail { display: flex; flex-direction: column; gap: 16px; }
 @media (max-width: 900px) {
   .lesson-split { grid-template-columns: 1fr; }
-  .lesson-rail-col { position: static; }
+  .lesson-rail-col { position: static; max-height: none; overflow: visible; padding-right: 0; }
 }
 
 /* плашка-ссылка в тексте на график в боковой панели */

@@ -476,13 +476,22 @@ function mountGeogebraOne(spec) {
     enableRightClick: false,
     language: "ru",
     appletOnLoad: function (api) {
-      // appName "3d" по умолчанию показывает панель Алгебры (сверстанную поверх/под
-      // самим 3D-видом — в узкой карточке рельсы это разваливает layout: большая
-      // пустая область + обрезанные строки переменных). "T" — код перспективы
-      // "только 3D-вид", подобран эмпирически (см. ggb_persp_test.html), других
-      // кодов вроде "5"/"G"/"3D" в API-доке нет.
+      // И "3d", и "geometry" по умолчанию показывают ещё и панель Алгебры (список
+      // созданных объектов) поверх/под самим видом — в узкой карточке рельсы это
+      // разваливает layout: большая пустая область + обрезанные строки переменных
+      // вместо самого рисунка. Коды перспективы "только вид, без Алгебры" подобраны
+      // эмпирически (см. scratchpad/ggb_persp_test.html, ggb_2d_persp_test.html) —
+      // "T" для 3D, "G" для 2D; в официальной API-доке они не задокументированы.
       if (spec.options.appName === "3d") {
         try { api.setPerspective("T"); } catch (e) { /* игнорируем */ }
+      } else {
+        try { api.setPerspective("G"); } catch (e) { /* игнорируем */ }
+        // координатные оси у app "geometry" по умолчанию выключены (это инструмент
+        // для чистых геометрических построений) — включаем только там, где график
+        // явно про координаты/тригонометрию (options.showAxes: true в content/*.js)
+        if (spec.options.showAxes) {
+          try { api.setAxesVisible(true, true); } catch (e) { /* игнорируем */ }
+        }
       }
       // spec.commands — GeoGebra-команды автора урока (доверенные, из content/*.js).
       for (const cmd of spec.commands) {
