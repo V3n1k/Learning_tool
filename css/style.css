@@ -225,7 +225,7 @@ a.graph-ref:hover { background: rgba(122, 162, 247, 0.22); }
   20% { background: rgba(224, 176, 76, 0.18); }
 }
 .theory-toc { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 20px; line-height: 1.9; }
-.theory-toc a { margin-right: 4px; }
+.theory-toc a { margin-right: 4px; cursor: pointer; }
 
 /* блок ДЗ */
 .hw-block {

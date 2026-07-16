@@ -686,20 +686,22 @@ function renderCourse(cid) {
  * textbooks/ в корне проекта, не коммитится). Уроки ссылаются на конкретные пункты
  * через lesson.theoryRefs — см. theoryRailHtml(). */
 
-function theoryPageHtml(page) {
-  // ПРИНИМАЕТ: одну страницу теории {id, title, items}. ВОЗВРАЩАЕТ: HTML со всеми её пунктами.
+function theoryPageHtml(page, graphSpecs) {
+  // ПРИНИМАЕТ: одну страницу теории {id, title, items} и (необязательно) общий массив
+  // graphSpecs для сбора ```geogebra-блоков. ВОЗВРАЩАЕТ: HTML со всеми пунктами страницы.
   let html = '<h2 id="theory-page-' + esc(page.id) + '">' + esc(page.title) + '</h2>';
   for (const item of (page.items || [])) {
     html += '<div class="theory-item" id="theory-item-' + esc(page.id) + '-' + esc(item.id) + '">' +
       '<h3>' + esc(item.title) + '</h3>' +
-      renderMd(item.body || "") +
+      renderMd(item.body || "", graphSpecs) +
       '</div>';
   }
   return html;
 }
 
-function theoryRailHtml(course, refs) {
-  // ПРИНИМАЕТ: курс и массив строк "moduleTheoryId:itemId" (lesson.theoryRefs).
+function theoryRailHtml(course, refs, graphSpecs) {
+  // ПРИНИМАЕТ: курс, массив строк "moduleTheoryId:itemId" (lesson.theoryRefs) и ОБЩИЙ
+  // с уроком массив graphSpecs (чтобы графики теории и урока монтировались одним вызовом).
   // ВОЗВРАЩАЕТ: HTML карточек — компактный текст теоремы/формулы + ссылка на полную страницу теории.
   const resolved = (refs || []).map(r => findTheoryItem(course, r)).filter(Boolean);
   if (!resolved.length) return "";
@@ -708,7 +710,7 @@ function theoryRailHtml(course, refs) {
     resolved.map(({ page, item }) =>
       '<div class="theory-card">' +
         '<div class="theory-card-title">' + esc(item.title) + '</div>' +
-        renderMd(item.body || "") +
+        renderMd(item.body || "", graphSpecs) +
         '<a class="theory-card-link" href="#/theory/' + encodeURIComponent(course.id) + '/' + encodeURIComponent(page.id) + '/' + encodeURIComponent(item.id) + '">вся тема «' + esc(page.title) + '» →</a>' +
       '</div>'
     ).join("") +
@@ -721,13 +723,20 @@ function renderTheoryPage(cid, pageId, focusItemId) {
   const page = course && findTheoryPage(course, pageId);
   if (!course || !page) { app.innerHTML = '<p class="empty">Страница теории не найдена. <a href="#/course/' + encodeURIComponent(cid) + '">Назад к курсу</a></p>'; return; }
 
+  const graphSpecs = [];
+  const bodyHtml = '<div class="lesson-content theory-content">' + theoryPageHtml(page, graphSpecs) + '</div>';
   const html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' + esc(course.title) + '</a> / Теория</div>' +
     '<div class="page-head"><h1>📖 ' + esc(page.title) + '</h1>' +
     '<a class="btn btn-sm" href="#/theory-all/' + encodeURIComponent(cid) + '">Вся шпаргалка курса →</a></div>' +
     '<p class="hint" style="margin-bottom:20px">Сухая теория: определения, теоремы, формулы — без привязки к формату экзамена. Примеры и разбор заданий — в уроках модуля.</p>' +
-    '<div class="lesson-content theory-content">' + theoryPageHtml(page) + '</div>';
+    (graphSpecs.length
+      ? '<div class="lesson-split"><div class="lesson-main">' + bodyHtml + '</div><div class="lesson-rail-col">' + graphRailHtml(graphSpecs) + '</div></div>'
+      : bodyHtml);
+  app.classList.toggle("app-wide", graphSpecs.length > 0);
   app.innerHTML = html;
   if (window.Prism) Prism.highlightAllUnder(app);
+  mountGeogebra(graphSpecs);
+  wireGraphRefs(app);
   if (focusItemId) {
     const el = document.getElementById("theory-item-" + page.id + "-" + focusItemId);
     if (el) {
@@ -743,16 +752,30 @@ function renderTheoryAll(cid) {
   const course = findCourse(courses, cid);
   if (!course || !course.theory || !course.theory.length) { app.innerHTML = '<p class="empty">Для этого курса шпаргалка пока не готова. <a href="#/course/' + encodeURIComponent(cid) + '">Назад к курсу</a></p>'; return; }
 
+  const graphSpecs = [];
+  const bodyHtml = '<div class="lesson-content theory-content">' +
+    course.theory.map(p => theoryPageHtml(p, graphSpecs)).join('<hr>') +
+    '</div>';
   let html = '<div class="crumbs"><a href="#/">Курсы</a> / <a href="#/course/' + encodeURIComponent(cid) + '">' + esc(course.title) + '</a> / Шпаргалка</div>' +
     '<div class="page-head"><h1>📚 Полная шпаргалка: ' + esc(course.title) + '</h1></div>' +
     '<div class="theory-toc"><b>Содержание:</b> ' +
-    course.theory.map(p => '<a href="#theory-page-' + esc(p.id) + '">' + esc(p.title) + '</a>').join(' · ') +
+    course.theory.map(p => '<a class="theory-toc-link" data-scroll-to="theory-page-' + esc(p.id) + '">' + esc(p.title) + '</a>').join(' · ') +
     '</div>' +
-    '<div class="lesson-content theory-content">' +
-    course.theory.map(theoryPageHtml).join('<hr>') +
-    '</div>';
+    (graphSpecs.length
+      ? '<div class="lesson-split"><div class="lesson-main">' + bodyHtml + '</div><div class="lesson-rail-col">' + graphRailHtml(graphSpecs) + '</div></div>'
+      : bodyHtml);
+  app.classList.toggle("app-wide", graphSpecs.length > 0);
   app.innerHTML = html;
   if (window.Prism) Prism.highlightAllUnder(app);
+  mountGeogebra(graphSpecs);
+  wireGraphRefs(app);
+  app.querySelectorAll("[data-scroll-to]").forEach(a => {
+    a.onclick = e => {
+      e.preventDefault();
+      const el = document.getElementById(a.dataset.scrollTo);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  });
 }
 
 /* ---------------- страница: урок ---------------- */
@@ -804,7 +827,7 @@ function renderLesson(cid, mid, lid) {
       '<button class="btn" id="cardsAnkiBtn">📋 Для Anki (TSV)</button></div>';
   }
 
-  const theoryRail = theoryRailHtml(course, lesson.theoryRefs);
+  const theoryRail = theoryRailHtml(course, lesson.theoryRefs, graphSpecs);
   if (graphSpecs.length || theoryRail) {
     html += '<div class="lesson-split"><div class="lesson-main">' + mainHtml + '</div>' +
       '<div class="lesson-rail-col">' + theoryRail + graphRailHtml(graphSpecs) + '</div></div>';
