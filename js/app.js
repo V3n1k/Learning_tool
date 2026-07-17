@@ -334,6 +334,44 @@ function renderMd(text, graphSpecs) {
         continue;
       }
 
+      if (lang === "graph") {
+        // свой лёгкий SVG-рендерер графов (вершины/рёбра) — offline, без GeoGebra;
+        // синтаксис строк: "V id [подпись]" и "E from to [вес]"
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* по умолчанию */ }
+        }
+        const spec = parseGraphBody(unesc(buf.join("\n")));
+        spec.directed = !!options.directed;
+        out.push(graphSvg(spec, options));
+        continue;
+      }
+
+      if (lang === "truthtable") {
+        // интерактивная таблица истинности: тело — булево выражение (¬ ∧ ∨ → ↔),
+        // переменные определяются автоматически (заглавные латинские буквы)
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* по умолчанию */ }
+        }
+        const expr = unesc(buf.join("\n")).trim();
+        out.push(truthTableHtml(expr, options));
+        continue;
+      }
+
+      if (lang === "adjmatrix") {
+        // интерактивная таблица смежности, опционально с картинкой графа сверху
+        // (тот же синтаксис "V"/"E", что и у ```graph)
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* по умолчанию */ }
+        }
+        const spec = parseGraphBody(unesc(buf.join("\n")));
+        spec.directed = !!options.directed;
+        out.push(adjMatrixHtml(spec, options));
+        continue;
+      }
+
       // сопоставляем частые обозначения с классами языков, которые понимает Prism
       const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang] || "";
       const codeClass = langClass ? ' class="language-' + langClass + '"' : "";
@@ -600,6 +638,252 @@ function wireGraphRefs(container) {
   });
 }
 
+/* ---------------- графы и интерактивные таблицы (свой SVG, без интернета) ---------------- */
+
+function parseGraphBody(text) {
+  // разбирает строки вида "V id [подпись]" и "E from to [вес]" в {vertices, edges}
+  const vertices = [];
+  const edges = [];
+  for (const raw of text.split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const parts = line.split(/\s+/);
+    if (parts[0] === "V") {
+      const id = parts[1];
+      if (!id) continue;
+      vertices.push({ id, label: parts.slice(2).join(" ") || id });
+    } else if (parts[0] === "E") {
+      const from = parts[1], to = parts[2];
+      if (!from || !to) continue;
+      edges.push({ from, to, weight: parts[3] !== undefined ? parts[3] : null });
+    }
+  }
+  return { vertices, edges };
+}
+
+function graphSvg(spec, options) {
+  // круговая раскладка вершин — не требует ручных координат от автора урока и
+  // всегда даёт читаемую картинку независимо от числа вершин
+  const { vertices, edges } = spec;
+  if (!vertices.length) return "";
+  const size = options.size || 320;
+  const cx = size / 2, cy = size / 2, r = size / 2 - 36, vr = 19;
+  const pos = {};
+  vertices.forEach((v, i) => {
+    const a = -Math.PI / 2 + (2 * Math.PI * i) / vertices.length;
+    pos[v.id] = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  });
+  const markerId = "arrow-" + Math.random().toString(36).slice(2, 8);
+  let svg = '<svg viewBox="0 0 ' + size + ' ' + size + '" class="graph-svg" xmlns="http://www.w3.org/2000/svg">';
+  if (spec.directed) {
+    svg += '<defs><marker id="' + markerId + '" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+      '<path d="M0,0L10,5L0,10z" fill="#7aa2f7"/></marker></defs>';
+  }
+  for (const e of edges) {
+    const a = pos[e.from], b = pos[e.to];
+    if (!a || !b) continue;
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const x1 = a.x + ux * vr, y1 = a.y + uy * vr, x2 = b.x - ux * vr, y2 = b.y - uy * vr;
+    svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#7aa2f7" stroke-width="2.5"' +
+      (spec.directed ? ' marker-end="url(#' + markerId + ')"' : "") + "/>";
+    if (e.weight !== null) {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      svg += '<rect x="' + (mx - 12) + '" y="' + (my - 10) + '" width="24" height="16" rx="4" fill="#1a1d27"/>' +
+        '<text x="' + mx + '" y="' + (my + 3) + '" text-anchor="middle" font-size="12" fill="#e0b04c">' + esc(String(e.weight)) + "</text>";
+    }
+  }
+  for (const v of vertices) {
+    const p = pos[v.id];
+    svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + vr + '" fill="#232735" stroke="#7aa2f7" stroke-width="2"/>' +
+      '<text x="' + p.x + '" y="' + (p.y + 5) + '" text-anchor="middle" font-size="14" font-weight="600" fill="#e8eaf0">' + esc(v.label) + "</text>";
+  }
+  svg += "</svg>";
+  return '<div class="graph-wrap">' + svg + "</div>";
+}
+
+// ---- булевы выражения: токенизатор + рекурсивный спуск (¬ высший приоритет, дальше ∧, ∨, →, ↔) ----
+
+function tokenizeBool(s) {
+  const tokens = [];
+  let i = 0;
+  while (i < s.length) {
+    const c = s[i];
+    if (/\s/.test(c)) { i++; continue; }
+    if ("¬∧∨→↔()".includes(c)) { tokens.push(c); i++; continue; }
+    if (/[A-Z]/.test(c)) {
+      let j = i + 1;
+      while (j < s.length && /[A-Z0-9]/.test(s[j])) j++;
+      tokens.push(s.slice(i, j));
+      i = j;
+      continue;
+    }
+    i++; // пропускаем нераспознанный символ (пунктуацию и т.п.)
+  }
+  return tokens;
+}
+
+function boolVarsOf(expr) {
+  return Array.from(new Set(tokenizeBool(expr).filter(t => /^[A-Z][A-Z0-9]*$/.test(t)))).sort();
+}
+
+function makeBoolEvaluator(expr) {
+  const tokens = tokenizeBool(expr);
+  let pos = 0;
+  const peek = () => tokens[pos];
+  const next = () => tokens[pos++];
+  function equiv(vals) {
+    let v = impl(vals);
+    while (peek() === "↔") { next(); const r = impl(vals); v = v === r ? 1 : 0; }
+    return v;
+  }
+  function impl(vals) {
+    let v = or(vals);
+    while (peek() === "→") { next(); const r = or(vals); v = (v === 1 && r === 0) ? 0 : 1; }
+    return v;
+  }
+  function or(vals) {
+    let v = and(vals);
+    while (peek() === "∨") { next(); const r = and(vals); v = (v || r) ? 1 : 0; }
+    return v;
+  }
+  function and(vals) {
+    let v = not(vals);
+    while (peek() === "∧") { next(); const r = not(vals); v = (v && r) ? 1 : 0; }
+    return v;
+  }
+  function not(vals) {
+    if (peek() === "¬") { next(); return not(vals) ? 0 : 1; }
+    return primary(vals);
+  }
+  function primary(vals) {
+    if (peek() === "(") { next(); const v = equiv(vals); if (peek() === ")") next(); return v; }
+    const t = next();
+    return vals[t] ? 1 : 0;
+  }
+  return function (vals) { pos = 0; return equiv(vals); };
+}
+
+// answer key живых таблиц (id -> корректные значения) — заполняется в renderMd,
+// используется при проверке/показе ответа после вставки HTML в DOM
+const interactiveAnswers = new Map();
+
+function truthTableHtml(expr, options) {
+  const vars = (options.vars && options.vars.length) ? options.vars : boolVarsOf(expr);
+  if (!vars.length) return '<p class="hint">Не удалось определить переменные выражения.</p>';
+  const n = vars.length;
+  const evalFn = makeBoolEvaluator(expr);
+  const rows = [];
+  for (let i = 0; i < (1 << n); i++) {
+    const vals = {};
+    vars.forEach((v, idx) => { vals[v] = (i >> (n - 1 - idx)) & 1; });
+    rows.push(vals);
+  }
+  const answers = rows.map(vals => evalFn(vals));
+  const id = "itbl-" + Math.random().toString(36).slice(2, 10);
+  interactiveAnswers.set(id, { type: "truthtable", answers });
+  let html = '<div class="itable-wrap" data-itable="' + id + '">' +
+    '<div class="itable-expr">F = ' + esc(expr) + "</div>" +
+    '<table class="itable"><thead><tr>' + vars.map(v => "<th>" + esc(v) + "</th>").join("") + "<th>F</th></tr></thead><tbody>";
+  rows.forEach((vals, i) => {
+    html += "<tr>" + vars.map(v => "<td>" + vals[v] + "</td>").join("") +
+      '<td><input class="itable-cell" data-row="' + i + '" maxlength="1" inputmode="numeric" autocomplete="off"></td></tr>';
+  });
+  html += "</tbody></table>" + itableControls(id) + "</div>";
+  return html;
+}
+
+function adjMatrixHtml(spec, options) {
+  const { vertices, edges } = spec;
+  if (!vertices.length) return '<p class="hint">Пустой граф.</p>';
+  const weighted = edges.some(e => e.weight !== null);
+  const idx = {};
+  vertices.forEach((v, i) => { idx[v.id] = i; });
+  const n = vertices.length;
+  const answer = Array.from({ length: n }, () => Array(n).fill(0));
+  for (const e of edges) {
+    const i = idx[e.from], j = idx[e.to];
+    if (i === undefined || j === undefined) continue;
+    const val = weighted ? Number(e.weight) : 1;
+    answer[i][j] = val;
+    if (!spec.directed) answer[j][i] = val;
+  }
+  const id = "itbl-" + Math.random().toString(36).slice(2, 10);
+  interactiveAnswers.set(id, { type: "adjmatrix", answer, n });
+  let html = '<div class="itable-wrap" data-itable="' + id + '">';
+  if (options.showGraph !== false) html += graphSvg(spec, options);
+  html += '<table class="itable adjmatrix"><thead><tr><th></th>' +
+    vertices.map(v => "<th>" + esc(v.label) + "</th>").join("") + "</tr></thead><tbody>";
+  vertices.forEach((v, i) => {
+    html += "<tr><th>" + esc(v.label) + "</th>" + vertices.map((v2, j) =>
+      i === j ? '<td class="itable-diag">—</td>' :
+        '<td><input class="itable-cell" data-row="' + i + '" data-col="' + j + '" maxlength="3" inputmode="numeric" autocomplete="off"></td>'
+    ).join("") + "</tr>";
+  });
+  html += "</tbody></table>" + itableControls(id) + "</div>";
+  return html;
+}
+
+function itableControls(id) {
+  return '<div class="itable-controls">' +
+    '<button class="btn btn-sm" data-check-table="' + id + '">Проверить</button>' +
+    '<button class="btn btn-sm" data-reveal-table="' + id + '">Показать ответ</button>' +
+    '<span class="itable-status" data-status="' + id + '"></span></div>';
+}
+
+function checkInteractiveTable(id) {
+  const ans = interactiveAnswers.get(id);
+  const wrap = document.querySelector('[data-itable="' + id + '"]');
+  if (!ans || !wrap) return;
+  let correct = 0, total = 0;
+  wrap.querySelectorAll("input.itable-cell").forEach(inp => {
+    total++;
+    const got = inp.value.trim();
+    let ok;
+    if (ans.type === "truthtable") {
+      ok = got === String(ans.answers[Number(inp.dataset.row)]);
+    } else {
+      const expected = ans.answer[Number(inp.dataset.row)][Number(inp.dataset.col)];
+      const gotNum = got === "" ? 0 : Number(got);
+      ok = !isNaN(gotNum) && gotNum === expected;
+    }
+    if (ok) correct++;
+    inp.classList.toggle("itable-ok", ok);
+    inp.classList.toggle("itable-bad", !ok);
+  });
+  const status = document.querySelector('[data-status="' + id + '"]');
+  if (status) status.textContent = correct + " из " + total + " верно" + (correct === total ? " 🎉" : "");
+}
+
+function revealInteractiveTable(id) {
+  const ans = interactiveAnswers.get(id);
+  const wrap = document.querySelector('[data-itable="' + id + '"]');
+  if (!ans || !wrap) return;
+  wrap.querySelectorAll("input.itable-cell").forEach(inp => {
+    const val = ans.type === "truthtable"
+      ? ans.answers[Number(inp.dataset.row)]
+      : ans.answer[Number(inp.dataset.row)][Number(inp.dataset.col)];
+    inp.value = (ans.type === "adjmatrix" && val === 0) ? "" : String(val);
+    inp.classList.remove("itable-bad");
+    inp.classList.add("itable-ok");
+  });
+  const status = document.querySelector('[data-status="' + id + '"]');
+  if (status) status.textContent = "Показан правильный ответ";
+}
+
+function wireInteractiveTables(container) {
+  container.querySelectorAll("[data-check-table]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => checkInteractiveTable(btn.dataset.checkTable);
+  });
+  container.querySelectorAll("[data-reveal-table]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => revealInteractiveTable(btn.dataset.revealTable);
+  });
+}
+
 /* ---------------- карточки: RemNote / Anki ---------------- */
 
 function courseCards(course) {
@@ -841,6 +1125,7 @@ function renderTheoryPage(cid, pageId, focusItemId) {
   if (window.Prism) Prism.highlightAllUnder(app);
   mountGeogebra(graphSpecs);
   wireGraphRefs(app);
+  wireInteractiveTables(app);
   if (focusItemId) {
     const el = document.getElementById("theory-item-" + page.id + "-" + focusItemId);
     if (el) {
@@ -875,6 +1160,7 @@ function renderTheoryAll(cid) {
   if (window.Prism) Prism.highlightAllUnder(app);
   mountGeogebra(graphSpecs);
   wireGraphRefs(app);
+  wireInteractiveTables(app);
   app.querySelectorAll("[data-scroll-to]").forEach(a => {
     a.onclick = e => {
       e.preventDefault();
@@ -951,6 +1237,7 @@ function renderLesson(cid, mid, lid) {
   if (window.Prism) Prism.highlightAllUnder(app);
   mountGeogebra(graphSpecs);
   wireGraphRefs(app);
+  wireInteractiveTables(app);
 
   document.getElementById("doneBtn").onclick = () => {
     const cur = progress[key] || {};
@@ -1192,6 +1479,7 @@ function renderPracticeProblem() {
     '</div>';
   mountGeogebra(graphSpecs);
   wireGraphRefs(body);
+  wireInteractiveTables(body);
 
   cmEditor = CodeMirror(document.getElementById("cmHost"), {
     value: solutionMode ? problem.solution : (savedCode !== undefined ? savedCode : problem.starterCode),

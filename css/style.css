@@ -393,3 +393,29 @@ main.app-wide { max-width: 1400px; }
   main { padding: 16px 12px 60px; }
   .course-stat-row .name { width: 130px; }
 }
+
+/* ---------------- графы (свой SVG) и интерактивные таблицы ---------------- */
+.graph-wrap { display: flex; justify-content: center; margin: 16px 0; }
+.graph-svg { width: 100%; max-width: 360px; height: auto; }
+
+.itable-wrap { margin: 16px 0; }
+.itable-expr {
+  font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.92rem;
+  color: var(--text-dim); margin-bottom: 8px;
+}
+.itable { border-collapse: collapse; margin: 8px 0; }
+.itable th, .itable td {
+  border: 1px solid var(--border); padding: 6px 10px; text-align: center; font-size: 0.9rem;
+}
+.itable th { background: var(--bg3); }
+.itable-diag { color: var(--text-dim); background: var(--bg3); }
+.itable-cell {
+  width: 44px; text-align: center; background: var(--bg2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 2px; font-size: 0.9rem;
+  font-family: "JetBrains Mono", Consolas, monospace;
+}
+.itable-cell:focus { outline: none; border-color: var(--accent); }
+.itable-cell.itable-ok { border-color: var(--green); background: rgba(76, 175, 125, 0.14); }
+.itable-cell.itable-bad { border-color: var(--red); background: rgba(224, 92, 92, 0.12); }
+.itable-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.itable-status { font-size: 0.88rem; color: var(--text-dim); }
