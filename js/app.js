@@ -372,6 +372,18 @@ function renderMd(text, graphSpecs) {
         continue;
       }
 
+      if (lang === "table") {
+        // общая интерактивная таблица с произвольными подписями строк/столбцов
+        // (экспортируется конструктором таблиц в Песочнице); тело — строки через
+        // запятую, "-"/"—" — заблокированная ячейка
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* по умолчанию */ }
+        }
+        out.push(tableHtml(options, unesc(buf.join("\n"))));
+        continue;
+      }
+
       // сопоставляем частые обозначения с классами языков, которые понимает Prism
       const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang] || "";
       const codeClass = langClass ? ' class="language-' + langClass + '"' : "";
@@ -767,6 +779,13 @@ function makeBoolEvaluator(expr) {
 // answer key живых таблиц (id -> корректные значения) — заполняется в renderMd,
 // используется при проверке/показе ответа после вставки HTML в DOM
 const interactiveAnswers = new Map();
+// снимок значений сразу ПЕРЕД "Показать ответ" — нужен, чтобы кнопка
+// "Вернуть свои ответы" могла отменить показ и восстановить то, что вписал ученик
+const revealedPrevValues = new Map();
+
+function itableCellInput(extraAttrs) {
+  return '<span class="icell"><input class="itable-cell" ' + extraAttrs + ' autocomplete="off"><small class="iwas"></small></span>';
+}
 
 function truthTableHtml(expr, options) {
   const vars = (options.vars && options.vars.length) ? options.vars : boolVarsOf(expr);
@@ -787,7 +806,7 @@ function truthTableHtml(expr, options) {
     '<table class="itable"><thead><tr>' + vars.map(v => "<th>" + esc(v) + "</th>").join("") + "<th>F</th></tr></thead><tbody>";
   rows.forEach((vals, i) => {
     html += "<tr>" + vars.map(v => "<td>" + vals[v] + "</td>").join("") +
-      '<td><input class="itable-cell" data-row="' + i + '" maxlength="1" inputmode="numeric" autocomplete="off"></td></tr>';
+      "<td>" + itableCellInput('data-row="' + i + '" maxlength="1" inputmode="numeric"') + "</td></tr>";
   });
   html += "</tbody></table>" + itableControls(id) + "</div>";
   return html;
@@ -817,8 +836,38 @@ function adjMatrixHtml(spec, options) {
   vertices.forEach((v, i) => {
     html += "<tr><th>" + esc(v.label) + "</th>" + vertices.map((v2, j) =>
       i === j ? '<td class="itable-diag">—</td>' :
-        '<td><input class="itable-cell" data-row="' + i + '" data-col="' + j + '" maxlength="3" inputmode="numeric" autocomplete="off"></td>'
+        "<td>" + itableCellInput('data-row="' + i + '" data-col="' + j + '" maxlength="3" inputmode="numeric"') + "</td>"
     ).join("") + "</tr>";
+  });
+  html += "</tbody></table>" + itableControls(id) + "</div>";
+  return html;
+}
+
+function parseTableBody(text) {
+  // строки через запятую; "-" или "—" — заблокированная ячейка (не редактируется,
+  // показывается как "—", например диагональ таблицы расстояний)
+  return text.split("\n").map(l => l.trim()).filter(Boolean).map(line =>
+    line.split(",").map(c => c.trim()).map(c => (c === "-" || c === "—") ? { blocked: true, value: "" } : { blocked: false, value: c })
+  );
+}
+
+function tableHtml(options, bodyText) {
+  // общая интерактивная таблица с произвольными подписями строк/столбцов —
+  // формат, который экспортирует конструктор таблиц в Песочнице
+  const cols = options.cols || [];
+  const rows = options.rows || [];
+  const answer = parseTableBody(bodyText);
+  if (!cols.length || !rows.length || !answer.length) return '<p class="hint">Пустая таблица.</p>';
+  const id = "itbl-" + Math.random().toString(36).slice(2, 10);
+  interactiveAnswers.set(id, { type: "table", answer });
+  let html = '<div class="itable-wrap" data-itable="' + id + '"><table class="itable"><thead><tr><th></th>' +
+    cols.map(c => "<th>" + esc(c) + "</th>").join("") + "</tr></thead><tbody>";
+  rows.forEach((rLabel, i) => {
+    html += "<tr><th>" + esc(rLabel) + "</th>" + cols.map((c, j) => {
+      const cell = (answer[i] && answer[i][j]) || { blocked: true, value: "" };
+      return cell.blocked ? '<td class="itable-diag">—</td>' :
+        "<td>" + itableCellInput('data-row="' + i + '" data-col="' + j + '" maxlength="8"') + "</td>";
+    }).join("") + "</tr>";
   });
   html += "</tbody></table>" + itableControls(id) + "</div>";
   return html;
@@ -828,7 +877,29 @@ function itableControls(id) {
   return '<div class="itable-controls">' +
     '<button class="btn btn-sm" data-check-table="' + id + '">Проверить</button>' +
     '<button class="btn btn-sm" data-reveal-table="' + id + '">Показать ответ</button>' +
+    '<button class="btn btn-sm" data-reset-table="' + id + '">Сбросить</button>' +
+    '<button class="btn btn-sm itable-undo-btn" data-undo-table="' + id + '" hidden>Вернуть свои ответы</button>' +
     '<span class="itable-status" data-status="' + id + '"></span></div>';
+}
+
+function cellExpectedStr(ans, row, col) {
+  if (ans.type === "truthtable") return String(ans.answers[row]);
+  if (ans.type === "adjmatrix") { const v = ans.answer[row][col]; return v === 0 ? "" : String(v); }
+  return ans.answer[row][col] ? ans.answer[row][col].value : "";
+}
+
+function cellIsCorrect(ans, row, col, got) {
+  if (ans.type === "adjmatrix") {
+    const expected = ans.answer[row][col];
+    const gotNum = got === "" ? 0 : Number(got);
+    return !isNaN(gotNum) && gotNum === expected;
+  }
+  return got === cellExpectedStr(ans, row, col);
+}
+
+function itableSetStatus(id, text) {
+  const status = document.querySelector('[data-status="' + id + '"]');
+  if (status) status.textContent = text;
 }
 
 function checkInteractiveTable(id) {
@@ -838,37 +909,72 @@ function checkInteractiveTable(id) {
   let correct = 0, total = 0;
   wrap.querySelectorAll("input.itable-cell").forEach(inp => {
     total++;
-    const got = inp.value.trim();
-    let ok;
-    if (ans.type === "truthtable") {
-      ok = got === String(ans.answers[Number(inp.dataset.row)]);
-    } else {
-      const expected = ans.answer[Number(inp.dataset.row)][Number(inp.dataset.col)];
-      const gotNum = got === "" ? 0 : Number(got);
-      ok = !isNaN(gotNum) && gotNum === expected;
-    }
+    const ok = cellIsCorrect(ans, Number(inp.dataset.row), Number(inp.dataset.col) || 0, inp.value.trim());
     if (ok) correct++;
     inp.classList.toggle("itable-ok", ok);
     inp.classList.toggle("itable-bad", !ok);
   });
-  const status = document.querySelector('[data-status="' + id + '"]');
-  if (status) status.textContent = correct + " из " + total + " верно" + (correct === total ? " 🎉" : "");
+  itableSetStatus(id, correct + " из " + total + " верно" + (correct === total ? " 🎉" : ""));
 }
 
 function revealInteractiveTable(id) {
   const ans = interactiveAnswers.get(id);
   const wrap = document.querySelector('[data-itable="' + id + '"]');
   if (!ans || !wrap) return;
-  wrap.querySelectorAll("input.itable-cell").forEach(inp => {
-    const val = ans.type === "truthtable"
-      ? ans.answers[Number(inp.dataset.row)]
-      : ans.answer[Number(inp.dataset.row)][Number(inp.dataset.col)];
-    inp.value = (ans.type === "adjmatrix" && val === 0) ? "" : String(val);
+  const inputs = Array.from(wrap.querySelectorAll("input.itable-cell"));
+  // запоминаем то, что было вписано, ДО перезаписи — для "Вернуть свои ответы"
+  revealedPrevValues.set(id, inputs.map(inp => inp.value));
+  inputs.forEach(inp => {
+    const row = Number(inp.dataset.row), col = Number(inp.dataset.col) || 0;
+    const prevVal = inp.value.trim();
+    const expected = cellExpectedStr(ans, row, col);
+    inp.value = expected;
     inp.classList.remove("itable-bad");
     inp.classList.add("itable-ok");
+    const was = inp.parentElement.querySelector(".iwas");
+    if (prevVal && prevVal !== expected) {
+      inp.classList.add("itable-diff");
+      if (was) { was.textContent = "было: " + prevVal; was.classList.add("show"); }
+    } else {
+      inp.classList.remove("itable-diff");
+      if (was) { was.textContent = ""; was.classList.remove("show"); }
+    }
   });
-  const status = document.querySelector('[data-status="' + id + '"]');
-  if (status) status.textContent = "Показан правильный ответ";
+  itableSetStatus(id, "Показан правильный ответ");
+  const undoBtn = wrap.querySelector(".itable-undo-btn");
+  if (undoBtn) undoBtn.hidden = false;
+}
+
+function restoreInteractiveTable(id) {
+  const wrap = document.querySelector('[data-itable="' + id + '"]');
+  const prev = revealedPrevValues.get(id);
+  if (!wrap || !prev) return;
+  const inputs = Array.from(wrap.querySelectorAll("input.itable-cell"));
+  inputs.forEach((inp, i) => {
+    inp.value = prev[i] || "";
+    inp.classList.remove("itable-ok", "itable-bad", "itable-diff");
+    const was = inp.parentElement.querySelector(".iwas");
+    if (was) { was.textContent = ""; was.classList.remove("show"); }
+  });
+  revealedPrevValues.delete(id);
+  itableSetStatus(id, "");
+  const undoBtn = wrap.querySelector(".itable-undo-btn");
+  if (undoBtn) undoBtn.hidden = true;
+}
+
+function resetInteractiveTable(id) {
+  const wrap = document.querySelector('[data-itable="' + id + '"]');
+  if (!wrap) return;
+  wrap.querySelectorAll("input.itable-cell").forEach(inp => {
+    inp.value = "";
+    inp.classList.remove("itable-ok", "itable-bad", "itable-diff");
+    const was = inp.parentElement.querySelector(".iwas");
+    if (was) { was.textContent = ""; was.classList.remove("show"); }
+  });
+  revealedPrevValues.delete(id);
+  itableSetStatus(id, "");
+  const undoBtn = wrap.querySelector(".itable-undo-btn");
+  if (undoBtn) undoBtn.hidden = true;
 }
 
 function wireInteractiveTables(container) {
@@ -881,6 +987,16 @@ function wireInteractiveTables(container) {
     if (btn._wired) return;
     btn._wired = true;
     btn.onclick = () => revealInteractiveTable(btn.dataset.revealTable);
+  });
+  container.querySelectorAll("[data-reset-table]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => resetInteractiveTable(btn.dataset.resetTable);
+  });
+  container.querySelectorAll("[data-undo-table]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => restoreInteractiveTable(btn.dataset.undoTable);
   });
 }
 

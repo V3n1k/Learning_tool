@@ -409,6 +409,7 @@ main.app-wide { max-width: 1400px; }
 }
 .itable th { background: var(--bg3); }
 .itable-diag { color: var(--text-dim); background: var(--bg3); }
+.icell { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
 .itable-cell {
   width: 44px; text-align: center; background: var(--bg2); color: var(--text);
   border: 1px solid var(--border); border-radius: 6px; padding: 4px 2px; font-size: 0.9rem;
@@ -417,5 +418,10 @@ main.app-wide { max-width: 1400px; }
 .itable-cell:focus { outline: none; border-color: var(--accent); }
 .itable-cell.itable-ok { border-color: var(--green); background: rgba(76, 175, 125, 0.14); }
 .itable-cell.itable-bad { border-color: var(--red); background: rgba(224, 92, 92, 0.12); }
+/* показ отличия от собственного ответа поверх "Показать ответ" — жёлтая рамка + подпись "было: X" */
+.itable-cell.itable-diff { box-shadow: 0 0 0 2px var(--yellow) inset; }
+.iwas { display: none; font-size: 0.68rem; color: var(--yellow); line-height: 1; white-space: nowrap; }
+.iwas.show { display: block; }
 .itable-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
 .itable-status { font-size: 0.88rem; color: var(--text-dim); }
+.itable-undo-btn[hidden] { display: none; }
