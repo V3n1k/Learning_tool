@@ -357,7 +357,19 @@ rows = [
 # твой код: перебери permutations(variables), для каждой проверь согласованность со всеми rows
 `,
               tests: [{ input: "", expected: "xyzw" }],
-              solution: `for perm in permutations(variables):
+              solution: `from itertools import permutations
+
+def F(w, x, y, z):
+    return w and (x or (y and not z))
+
+variables = ["w", "x", "y", "z"]
+rows = [
+    ((1, 0, 0, 1), 1),
+    ((0, 1, 0, 1), 1),
+    ((1, 0, 1, 1), 1),
+]
+
+for perm in permutations(variables):
     ok = True
     for cols, expected in rows:
         assign = {perm[i]: cols[i] for i in range(4)}
@@ -1842,7 +1854,14 @@ print(count)  # выведет: 32
 # твой код: перебор x от 1, пока запись 2*x+5 в троичной не окончится на "12"
 `,
               tests: [{ input: "", expected: "9 23 212" }],
-              solution: `x = 1
+              solution: `def to_base(n, b):
+    digits = ""
+    while n > 0:
+        digits = str(n % b) + digits
+        n //= b
+    return digits or "0"
+
+x = 1
 while True:
     value = 2 * x + 5
     if to_base(value, 3).endswith("12"):
@@ -2008,7 +2027,10 @@ print(bin(x | y))  # 0b1110 — там, где ХОТЯ БЫ ОДИН бит 1
 # затем перебор A от 1 до 99, для каждого проверка all(...) на x от 1 до 9999
 `,
               tests: [{ input: "", expected: "6" }],
-              solution: `def formula(x, A):
+              solution: `def DEL(x, n):
+    return x % n == 0
+
+def formula(x, A):
     return (not DEL(x, 6) or DEL(x, A)) or DEL(x, 9)
 
 best_A = 0
@@ -2509,7 +2531,10 @@ print(" ".join(status))
                 is_winning = True
                 break
         status[s] = "В" if is_winning else "П"
-    return status`
+    return status
+
+status = analyze(N=10)
+print(" ".join(status))`
             }
           ]
         },
@@ -2596,7 +2621,22 @@ status = analyze(N)
 # твой код: посчитай S1 в диапазоне 1..30 (и < N), для которых status[S1] == "П"
 `,
               tests: [{ input: "", expected: "8" }],
-              solution: `count = 0
+              solution: `def analyze(N, moves=(1, 2)):
+    status = ["?"] * N
+    for s in range(N - 1, -1, -1):
+        is_winning = False
+        for m in moves:
+            next_s = s + m
+            if next_s >= N or status[next_s] == "П":
+                is_winning = True
+                break
+        status[s] = "В" if is_winning else "П"
+    return status
+
+N = 25
+status = analyze(N)
+
+count = 0
 for S1 in range(1, 31):
     if S1 < N and status[S1] == "П":
         count += 1
@@ -2774,7 +2814,9 @@ print(count_programs(1, 8))
         target2 = n * 2
         if target2 <= B:
             ways[target2] = ways.get(target2, 0) + current
-    return ways.get(B, 0)`
+    return ways.get(B, 0)
+
+print(count_programs(1, 8))`
             }
           ]
         },
@@ -2934,7 +2976,17 @@ for x, y, z in combinations(candidates, 3):
 # переберите тройки через itertools.combinations, найдите сумму 30
 `,
               tests: [{ input: "", expected: "6 10 14" }],
-              solution: `candidates = [n for n in range(1, 30) if len(divisors_fast(n)) == 4]
+              solution: `def divisors_fast(n):
+    result = set()
+    d = 1
+    while d * d <= n:
+        if n % d == 0:
+            result.add(d)
+            result.add(n // d)
+        d += 1
+    return sorted(result)
+
+candidates = [n for n in range(1, 30) if len(divisors_fast(n)) == 4]
 
 from itertools import combinations
 for x, y, z in combinations(candidates, 3):
@@ -3181,7 +3233,38 @@ dvizh, tovar, magaz = data["Движение_товаров"], data["Товар"
 `,
               files: [{ name: "task03_database.ods", path: "files/ege-informatika/task03_database.ods" }],
               tests: [{ input: "", expected: "133228" }],
-              solution: `art, price = None, None
+              solution: `import zipfile, xml.etree.ElementTree as ET
+from datetime import date
+
+def read_ods(path):
+    # ДАНО: не нужно менять эту функцию, просто пользуйся ей.
+    NS = {"table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+          "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+    TBL = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
+    with zipfile.ZipFile(path) as z:
+        root = ET.fromstring(z.read("content.xml"))
+    result = {}
+    for table in root.findall(".//table:table", NS):
+        name = table.get(TBL + "name")
+        rows = []
+        for row in table.findall("table:table-row", NS):
+            cells = []
+            for cell in row.findall("table:table-cell", NS):
+                repeat = int(cell.get(TBL + "number-columns-repeated", "1"))
+                p = cell.find("text:p", NS)
+                value = p.text if p is not None else ""
+                cells.extend([value] * repeat)
+            while cells and cells[-1] == "":
+                cells.pop()
+            if cells:
+                rows.append(cells)
+        result[name] = rows
+    return result
+
+data = read_ods("task03_database.ods")
+dvizh, tovar, magaz = data["Движение_товаров"], data["Товар"], data["Магазин"]
+
+art, price = None, None
 for row in tovar[1:]:
     if row[2].strip() == "Варенец термостатный":
         art, price = row[0], int(row[5])
@@ -3308,7 +3391,38 @@ rows = [[int(x) for x in r] for r in data["Лист1"] if all(c.strip().isdigit(
 `,
               files: [{ name: "task09_rows.ods", path: "files/ege-informatika/task09_rows.ods" }],
               tests: [{ input: "", expected: "901" }],
-              solution: `def row_matches(row):
+              solution: `import zipfile, xml.etree.ElementTree as ET
+from collections import Counter
+
+def read_ods(path):
+    # ДАНО: не нужно менять эту функцию.
+    NS = {"table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+          "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+    TBL = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
+    with zipfile.ZipFile(path) as z:
+        root = ET.fromstring(z.read("content.xml"))
+    result = {}
+    for table in root.findall(".//table:table", NS):
+        name = table.get(TBL + "name")
+        rows = []
+        for row in table.findall("table:table-row", NS):
+            cells = []
+            for cell in row.findall("table:table-cell", NS):
+                repeat = int(cell.get(TBL + "number-columns-repeated", "1"))
+                p = cell.find("text:p", NS)
+                value = p.text if p is not None else ""
+                cells.extend([value] * repeat)
+            while cells and cells[-1] == "":
+                cells.pop()
+            if cells:
+                rows.append(cells)
+        result[name] = rows
+    return result
+
+data = read_ods("task09_rows.ods")
+rows = [[int(x) for x in r] for r in data["Лист1"] if all(c.strip().isdigit() for c in r)]
+
+def row_matches(row):
     cnt = Counter(row)
     triple = [v for v, c in cnt.items() if c == 3]
     singles = [v for v, c in cnt.items() if c == 1]
@@ -3440,7 +3554,32 @@ chapter_text = extract_chapter_range("task10_text.odt", "XIII", "XVI")
 `,
               files: [{ name: "task10_text.odt", path: "files/ege-informatika/task10_text.odt" }],
               tests: [{ input: "", expected: "13" }],
-              solution: `count = 0
+              solution: `import zipfile, xml.etree.ElementTree as ET
+import re
+
+def extract_chapter_range(path, start_heading, end_heading):
+    # ДАНО: не нужно менять эту функцию.
+    with zipfile.ZipFile(path) as z:
+        root = ET.fromstring(z.read("content.xml"))
+    TXT = "{urn:oasis:names:tc:opendocument:xmlns:text:1.0}"
+    elems = [e for e in root.iter() if e.tag in (TXT + "h", TXT + "p")]
+    in_range, chunks = False, []
+    for e in elems:
+        text = "".join(e.itertext())
+        if e.tag == TXT + "h":
+            stripped = text.strip()
+            if stripped == start_heading:
+                in_range = True
+                continue
+            elif stripped == end_heading:
+                break
+        if in_range:
+            chunks.append(text)
+    return "\\n".join(chunks)
+
+chapter_text = extract_chapter_range("task10_text.odt", "XIII", "XVI")
+
+count = 0
 for m in re.finditer(r"[рР]ук", chapter_text):
     start_i, end_i = m.start(), m.end()
     before = chapter_text[start_i - 1] if start_i > 0 else " "
@@ -3683,7 +3822,45 @@ N = len(values)
 `,
               files: [{ name: "task18_grid.ods", path: "files/ege-informatika/task18_grid.ods" }],
               tests: [{ input: "", expected: "2362 1205" }],
-              solution: `def blocked_right(r, c):
+              solution: `import zipfile, xml.etree.ElementTree as ET, re
+
+def read_grid_with_walls(path):
+    # ДАНО: не нужно менять эту функцию.
+    with zipfile.ZipFile(path) as z:
+        content = z.read("content.xml").decode("utf-8")
+    styles_raw = re.findall(r'<style:style style:name="(ce\\d+)"[^>]*>(.*?)</style:style>', content, re.S)
+    style_borders = {}
+    for name, body in styles_raw:
+        b = dict(re.findall(r'fo:border-(top|bottom|left|right)="([^"]+)"', body))
+        style_borders[name] = {k: (v != "none") for k, v in b.items()}
+    root = ET.fromstring(content)
+    NS = {"table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0", "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+    TBL = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
+    table = root.find(".//table:table", NS)
+    values, cell_styles = [], []
+    for row in table.findall("table:table-row", NS):
+        vals, sts = [], []
+        for cell in row.findall("table:table-cell", NS):
+            repeat = int(cell.get(TBL + "number-columns-repeated", "1"))
+            sname = cell.get(TBL + "style-name", "")
+            p = cell.find("text:p", NS)
+            v = p.text if p is not None else None
+            vals.extend([v] * repeat)
+            sts.extend([sname] * repeat)
+        if any(v is not None for v in vals):
+            values.append(vals)
+            cell_styles.append(sts)
+    N = len(values)
+    values = [[int(v) for v in row[:N]] for row in values]
+    cell_styles = [row[:N] for row in cell_styles]
+    def has_wall(r, c, side):
+        return style_borders.get(cell_styles[r][c], {}).get(side, False)
+    return values, has_wall
+
+values, has_wall = read_grid_with_walls("task18_grid.ods")
+N = len(values)
+
+def blocked_right(r, c):
     return c + 1 >= N or has_wall(r, c, "right") or has_wall(r, c + 1, "left")
 def blocked_down(r, c):
     return r + 1 >= N or has_wall(r, c, "bottom") or has_wall(r + 1, c, "top")
@@ -3820,7 +3997,43 @@ for row in rows:
 `,
               files: [{ name: "task22_processes.ods", path: "files/ege-informatika/task22_processes.ods" }],
               tests: [{ input: "", expected: "12" }],
-              solution: `finish = {}
+              solution: `import zipfile, xml.etree.ElementTree as ET
+
+def read_ods(path):
+    # ДАНО: не нужно менять эту функцию.
+    NS = {"table": "urn:oasis:names:tc:opendocument:xmlns:table:1.0",
+          "text": "urn:oasis:names:tc:opendocument:xmlns:text:1.0"}
+    TBL = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
+    with zipfile.ZipFile(path) as z:
+        root = ET.fromstring(z.read("content.xml"))
+    result = {}
+    for table in root.findall(".//table:table", NS):
+        name = table.get(TBL + "name")
+        rows = []
+        for row in table.findall("table:table-row", NS):
+            cells = []
+            for cell in row.findall("table:table-cell", NS):
+                repeat = int(cell.get(TBL + "number-columns-repeated", "1"))
+                p = cell.find("text:p", NS)
+                value = p.text if p is not None else ""
+                cells.extend([value] * repeat)
+            while cells and cells[-1] == "":
+                cells.pop()
+            if cells:
+                rows.append(cells)
+        result[name] = rows
+    return result
+
+data = read_ods("task22_processes.ods")
+rows = data["Лист1"][1:]
+
+proc = {}
+for row in rows:
+    pid, t, deps = row[0], int(row[1]), row[2]
+    dep_list = [] if deps == "0" else [int(x) for x in deps.split(";")]
+    proc[int(pid)] = {"time": t, "deps": dep_list}
+
+finish = {}
 def get_finish(pid):
     if pid in finish:
         return finish[pid]
@@ -3921,7 +4134,13 @@ L = len(sub)
 `,
               files: [{ name: "task24_bigtext.txt", path: "files/ege-informatika/task24_bigtext.txt" }],
               tests: [{ input: "", expected: "2981" }],
-              solution: `starts = [1 if text[i:i+L] == sub else 0 for i in range(n - L + 1)] + [0] * L
+              solution: `with open("task24_bigtext.txt") as f:
+    text = f.read()
+n = len(text)
+sub = "2025"
+L = len(sub)
+
+starts = [1 if text[i:i+L] == sub else 0 for i in range(n - L + 1)] + [0] * L
 sub_prefix = [0] * (n + 1)
 for i in range(n):
     sub_prefix[i+1] = sub_prefix[i] + starts[i]
@@ -4032,7 +4251,12 @@ pairs = [tuple(map(int, lines[i].split())) for i in range(1, N + 1)]
 `,
               files: [{ name: "task26_shelf.txt", path: "files/ege-informatika/task26_shelf.txt" }],
               tests: [{ input: "", expected: "564 444" }],
-              solution: `events = []
+              solution: `with open("task26_shelf.txt") as f:
+    lines = f.read().split("\\n")
+N = int(lines[0])
+pairs = [tuple(map(int, lines[i].split())) for i in range(1, N + 1)]
+
+events = []
 for idx, (shelf, expiry) in enumerate(pairs, start=1):
     events.append((shelf, "shelf", idx))
     events.append((expiry, "expiry", idx))
@@ -4227,7 +4451,56 @@ pts_a = load_points("task27_stars_A.txt")
 `,
               files: [{ name: "task27_stars_A.txt", path: "files/ege-informatika/task27_stars_A.txt" }],
               tests: [{ input: "", expected: "38471 61225" }],
-              solution: `clusters_a = cluster(pts_a, H=6, W=4.5)
+              solution: `def load_points(path):
+    # ДАНО: не нужно менять эту функцию.
+    pts = []
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            x, y = line.replace(",", ".").split()
+            pts.append((float(x), float(y)))
+    return pts
+
+def cluster(points, H, W):
+    # ДАНО: не нужно менять эту функцию.
+    remaining = list(points)
+    clusters = []
+    while remaining:
+        remaining.sort()
+        cluster_pts = [remaining.pop(0)]
+        changed = True
+        while changed:
+            changed = False
+            minx = min(p[0] for p in cluster_pts)
+            miny, maxy = min(p[1] for p in cluster_pts), max(p[1] for p in cluster_pts)
+            still = []
+            for p in remaining:
+                fits_x = minx - 1e-6 <= p[0] <= minx + W + 1e-6
+                new_miny, new_maxy = min(miny, p[1]), max(maxy, p[1])
+                if fits_x and new_maxy - new_miny <= H + 1e-6:
+                    cluster_pts.append(p)
+                    miny, maxy = new_miny, new_maxy
+                    changed = True
+                else:
+                    still.append(p)
+            remaining = still
+        clusters.append(cluster_pts)
+    return clusters
+
+def cluster_center(pts):
+    # ДАНО: не нужно менять эту функцию.
+    best, best_sum = None, None
+    for p in pts:
+        s = sum(((p[0]-q[0])**2 + (p[1]-q[1])**2)**0.5 for q in pts)
+        if best_sum is None or s < best_sum:
+            best_sum, best = s, p
+    return best
+
+pts_a = load_points("task27_stars_A.txt")
+
+clusters_a = cluster(pts_a, H=6, W=4.5)
 centers_a = [cluster_center(c) for c in clusters_a]
 Px = min(c[0] for c in centers_a)
 Py = min(c[1] for c in centers_a)
