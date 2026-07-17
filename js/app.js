@@ -1824,10 +1824,32 @@ function renderInbox() {
 
 /* ---------------- страница: песочница (свободная GeoGebra) ---------------- */
 
+let sandboxTab = "geogebra";
+
 function renderSandbox() {
+  const tabs = [
+    ["geogebra", "GeoGebra"],
+    ["graph", "🔗 Конструктор графов"],
+    ["table", "🔲 Конструктор таблиц"]
+  ];
   app.innerHTML =
-    '<div class="page-head"><h1>📐 Песочница</h1>' +
-    '<button class="btn" id="sandboxClearBtn">🗑 Очистить</button></div>' +
+    '<div class="page-head"><h1>📐 Песочница</h1></div>' +
+    '<div class="sandbox-tabs">' + tabs.map(([id, label]) =>
+      '<button class="btn btn-sm sandbox-tab' + (sandboxTab === id ? " active" : "") + '" data-sbtab="' + id + '">' + label + "</button>"
+    ).join("") + '</div>' +
+    '<div id="sandboxBody"></div>';
+  document.querySelectorAll("[data-sbtab]").forEach(btn => {
+    btn.onclick = () => { sandboxTab = btn.dataset.sbtab; renderSandbox(); };
+  });
+  const body = document.getElementById("sandboxBody");
+  if (sandboxTab === "graph") renderGraphBuilderTab(body);
+  else if (sandboxTab === "table") renderTableBuilderTab(body);
+  else renderGeogebraSandboxTab(body);
+}
+
+function renderGeogebraSandboxTab(container) {
+  container.innerHTML =
+    '<div style="margin-bottom:10px"><button class="btn" id="sandboxClearBtn">🗑 Очистить</button></div>' +
     '<p class="hint" style="margin-bottom:12px">Полноценная GeoGebra: строй что угодно — графики, чертежи, вычисления. Сохраняется автоматически в этом браузере.</p>' +
     '<div id="sandboxHost" style="width:100%;height:75vh;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)"></div>';
 
@@ -1871,6 +1893,330 @@ function renderSandbox() {
     }
   };
   new GGBApplet(params, true).inject("sandboxHost");
+}
+
+/* ---------------- конструктор графов (Песочница) ---------------- */
+
+let graphBuilder = null;
+let sandboxGraphExportMode = "graph";
+let gbDrag = null;
+
+function nextCyrillicLabel(n) {
+  // без Й,Ё,Ъ,Ь,Ы,Э — визуально спорные/редкие как одиночные подписи вершин
+  const letters = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЮЯ";
+  return letters[n % letters.length] + (n >= letters.length ? Math.floor(n / letters.length) : "");
+}
+
+function newGraphBuilder() {
+  return { vertices: [], edges: [], directed: false, nextIdx: 0, selected: null };
+}
+
+function renderGraphBuilderTab(container) {
+  if (!graphBuilder) graphBuilder = newGraphBuilder();
+  container.innerHTML =
+    '<p class="hint" style="margin-bottom:10px">Клик по пустому месту — новая вершина. Клик по вершине, потом по другой — ребро между ними (спросит вес). ' +
+    'Двойной клик по вершине — переименовать. Правая кнопка мыши — удалить вершину/ребро. Перетаскивай вершины мышью.</p>' +
+    '<label class="gbuild-check"><input type="checkbox" id="gbDirected"' + (graphBuilder.directed ? " checked" : "") + '> Ориентированный граф</label>' +
+    '<div id="gbSvgHost" class="gbuild-host"></div>' +
+    '<div class="itable-controls">' +
+    '<button class="btn btn-sm" id="gbClearBtn">Сбросить</button>' +
+    '<div class="gbuild-exportmode">' +
+    '<button class="btn btn-sm' + (sandboxGraphExportMode === "graph" ? " active" : "") + '" data-gbmode="graph">Как график</button>' +
+    '<button class="btn btn-sm' + (sandboxGraphExportMode === "adjmatrix" ? " active" : "") + '" data-gbmode="adjmatrix">Как таблицу смежности</button>' +
+    "</div></div>" +
+    '<textarea id="gbExport" class="itable-export" readonly rows="8"></textarea>' +
+    '<button class="btn btn-sm" id="gbCopyBtn">📋 Скопировать блок для урока</button>';
+
+  document.getElementById("gbDirected").onchange = (e) => { graphBuilder.directed = e.target.checked; refreshGraphBuilder(); };
+  document.getElementById("gbClearBtn").onclick = () => {
+    if (!confirm("Стереть граф?")) return;
+    graphBuilder = newGraphBuilder();
+    refreshGraphBuilder();
+  };
+  container.querySelectorAll("[data-gbmode]").forEach(btn => {
+    btn.onclick = () => { sandboxGraphExportMode = btn.dataset.gbmode; renderGraphBuilderTab(container); };
+  });
+  document.getElementById("gbCopyBtn").onclick = () => {
+    copyText(document.getElementById("gbExport").value).then(ok => toast(ok ? "Скопировано!" : "Не удалось скопировать"));
+  };
+  refreshGraphBuilder();
+}
+
+function graphBuilderSvgMarkup() {
+  const gb = graphBuilder;
+  const w = 640, h = 420, vr = 20;
+  let svg = '<svg id="gbSvg" viewBox="0 0 ' + w + " " + h + '" class="gbuild-svg" xmlns="http://www.w3.org/2000/svg">';
+  if (gb.directed) {
+    svg += '<defs><marker id="gbArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
+      '<path d="M0,0L10,5L0,10z" fill="#7aa2f7"/></marker></defs>';
+  }
+  for (const e of gb.edges) {
+    const a = gb.vertices.find(v => v.id === e.from), b = gb.vertices.find(v => v.id === e.to);
+    if (!a || !b) continue;
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+    const x1 = a.x + ux * vr, y1 = a.y + uy * vr, x2 = b.x - ux * vr, y2 = b.y - uy * vr;
+    svg += '<line class="gbuild-edge" data-edge="' + e.id + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 +
+      '" stroke="' + (e.color || "#7aa2f7") + '" stroke-width="3"' + (gb.directed ? ' marker-end="url(#gbArrow)"' : "") + "/>";
+    if (e.weight) {
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+      svg += '<rect class="gbuild-edge" data-edge="' + e.id + '" x="' + (mx - 13) + '" y="' + (my - 10) + '" width="26" height="16" rx="4" fill="#1a1d27"/>' +
+        '<text data-edge="' + e.id + '" x="' + mx + '" y="' + (my + 3) + '" text-anchor="middle" font-size="12" fill="#e0b04c" pointer-events="none">' + esc(e.weight) + "</text>";
+    }
+  }
+  for (const v of gb.vertices) {
+    const sel = gb.selected === v.id;
+    svg += '<circle class="gbuild-vertex" data-vertex="' + v.id + '" cx="' + v.x + '" cy="' + v.y + '" r="' + vr +
+      '" fill="' + (sel ? "#3a3f52" : "#232735") + '" stroke="' + (sel ? "#e0b04c" : "#7aa2f7") + '" stroke-width="' + (sel ? 3 : 2) + '"/>' +
+      '<text class="gbuild-vertex" data-vertex="' + v.id + '" x="' + v.x + '" y="' + (v.y + 5) +
+      '" text-anchor="middle" font-size="14" font-weight="600" fill="#e8eaf0">' + esc(v.label) + "</text>";
+  }
+  svg += "</svg>";
+  return svg;
+}
+
+function updateGraphBuilderVertexDom(svgEl, v) {
+  // во время драга двигаем только затронутые DOM-узлы напрямую, без полного
+  // перестроения SVG — сохраняет обработчики событий, навешанные на svgEl
+  const vr = 20;
+  svgEl.querySelectorAll('[data-vertex="' + v.id + '"]').forEach(el => {
+    if (el.tagName === "circle") { el.setAttribute("cx", v.x); el.setAttribute("cy", v.y); }
+    else if (el.tagName === "text") { el.setAttribute("x", v.x); el.setAttribute("y", v.y + 5); }
+  });
+  graphBuilder.edges.forEach(e => {
+    if (e.from !== v.id && e.to !== v.id) return;
+    const a = graphBuilder.vertices.find(x => x.id === e.from), b = graphBuilder.vertices.find(x => x.id === e.to);
+    if (!a || !b) return;
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+    const x1 = a.x + ux * vr, y1 = a.y + uy * vr, x2 = b.x - ux * vr, y2 = b.y - uy * vr;
+    const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+    svgEl.querySelectorAll('[data-edge="' + e.id + '"]').forEach(el => {
+      if (el.tagName === "line") { el.setAttribute("x1", x1); el.setAttribute("y1", y1); el.setAttribute("x2", x2); el.setAttribute("y2", y2); }
+      else if (el.tagName === "rect") { el.setAttribute("x", mx - 13); el.setAttribute("y", my - 10); }
+      else if (el.tagName === "text") { el.setAttribute("x", mx); el.setAttribute("y", my + 3); }
+    });
+  });
+}
+
+function svgPoint(svgEl, evt) {
+  const rect = svgEl.getBoundingClientRect();
+  const vb = svgEl.viewBox.baseVal;
+  return { x: (evt.clientX - rect.left) / rect.width * vb.width, y: (evt.clientY - rect.top) / rect.height * vb.height };
+}
+
+function refreshGraphBuilder() {
+  const host = document.getElementById("gbSvgHost");
+  if (!host) return;
+  host.innerHTML = graphBuilderSvgMarkup();
+  wireGraphBuilderCanvas(document.getElementById("gbSvg"));
+  updateGraphBuilderExport();
+}
+
+function graphBuilderExportText() {
+  const gb = graphBuilder;
+  const tag = sandboxGraphExportMode === "adjmatrix" ? "adjmatrix" : "graph";
+  const opts = gb.directed ? '{"directed":true}' : "{}";
+  const lines = ["```" + tag + " " + opts];
+  gb.vertices.forEach(v => lines.push("V " + v.id + " " + v.label));
+  gb.edges.forEach(e => lines.push("E " + e.from + " " + e.to + (e.weight ? " " + e.weight : "")));
+  lines.push("```");
+  return lines.join("\n");
+}
+
+function updateGraphBuilderExport() {
+  const ta = document.getElementById("gbExport");
+  if (ta) ta.value = graphBuilderExportText();
+}
+
+function wireGraphBuilderCanvas(svgEl) {
+  if (!svgEl) return;
+  svgEl.addEventListener("pointerdown", (e) => {
+    const vid = e.target.dataset.vertex;
+    const pt = svgPoint(svgEl, e);
+    gbDrag = vid ? { vertexId: vid, moved: false, startX: pt.x, startY: pt.y } : null;
+  });
+  svgEl.addEventListener("pointermove", (e) => {
+    if (!gbDrag) return;
+    const pt = svgPoint(svgEl, e);
+    if (Math.hypot(pt.x - gbDrag.startX, pt.y - gbDrag.startY) > 4) gbDrag.moved = true;
+    if (gbDrag.moved) {
+      const v = graphBuilder.vertices.find(x => x.id === gbDrag.vertexId);
+      // точечно двигаем DOM-узлы (а не svgEl.outerHTML = ...) — полная замена узла
+      // на середине драга сносит уже навешанные на него обработчики событий
+      if (v) { v.x = pt.x; v.y = pt.y; updateGraphBuilderVertexDom(svgEl, v); }
+    }
+  });
+  svgEl.addEventListener("pointerup", (e) => {
+    const pt = svgPoint(svgEl, e);
+    if (gbDrag) {
+      if (!gbDrag.moved) onGraphBuilderVertexClick(gbDrag.vertexId);
+      else refreshGraphBuilder();
+    } else {
+      const eid = e.target.dataset.edge;
+      if (eid) onGraphBuilderEdgeClick(eid);
+      else if (e.target === svgEl) onGraphBuilderCanvasClick(pt);
+    }
+    gbDrag = null;
+  });
+  svgEl.addEventListener("dblclick", (e) => {
+    if (e.target.dataset.vertex) onGraphBuilderVertexRename(e.target.dataset.vertex);
+  });
+  svgEl.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (e.target.dataset.vertex) onGraphBuilderVertexDelete(e.target.dataset.vertex);
+    else if (e.target.dataset.edge) onGraphBuilderEdgeDelete(e.target.dataset.edge);
+  });
+}
+
+function onGraphBuilderCanvasClick(pt) {
+  const gb = graphBuilder;
+  gb.vertices.push({ id: "v" + gb.nextIdx, label: nextCyrillicLabel(gb.nextIdx), x: pt.x, y: pt.y });
+  gb.nextIdx++;
+  gb.selected = null;
+  refreshGraphBuilder();
+}
+
+function onGraphBuilderVertexClick(vid) {
+  const gb = graphBuilder;
+  if (gb.selected === null) {
+    gb.selected = vid;
+  } else if (gb.selected === vid) {
+    gb.selected = null;
+  } else {
+    const exists = gb.edges.some(e => (e.from === gb.selected && e.to === vid) || (!gb.directed && e.from === vid && e.to === gb.selected));
+    if (!exists) {
+      const w = prompt("Вес ребра (необязательно, оставь пустым):", "");
+      if (w !== null) gb.edges.push({ id: "e" + Math.random().toString(36).slice(2, 8), from: gb.selected, to: vid, weight: w.trim(), color: null });
+    }
+    gb.selected = null;
+  }
+  refreshGraphBuilder();
+}
+
+function onGraphBuilderVertexRename(vid) {
+  const v = graphBuilder.vertices.find(x => x.id === vid);
+  if (!v) return;
+  const name = prompt("Название вершины:", v.label);
+  if (name !== null && name.trim()) { v.label = name.trim(); refreshGraphBuilder(); }
+}
+
+function onGraphBuilderVertexDelete(vid) {
+  if (!confirm("Удалить вершину и все её рёбра?")) return;
+  const gb = graphBuilder;
+  gb.vertices = gb.vertices.filter(v => v.id !== vid);
+  gb.edges = gb.edges.filter(e => e.from !== vid && e.to !== vid);
+  if (gb.selected === vid) gb.selected = null;
+  refreshGraphBuilder();
+}
+
+function onGraphBuilderEdgeClick(eid) {
+  const e = graphBuilder.edges.find(x => x.id === eid);
+  if (!e) return;
+  const w = prompt("Вес ребра (оставь пустым, если без веса):", e.weight || "");
+  if (w !== null) { e.weight = w.trim(); refreshGraphBuilder(); }
+}
+
+function onGraphBuilderEdgeDelete(eid) {
+  if (!confirm("Удалить ребро?")) return;
+  graphBuilder.edges = graphBuilder.edges.filter(x => x.id !== eid);
+  refreshGraphBuilder();
+}
+
+/* ---------------- конструктор таблиц (Песочница) ---------------- */
+
+let tableBuilder = null;
+
+function newTableBuilder() {
+  return { cols: ["А", "Б"], rows: ["А", "Б"], cells: [["-", ""], ["", "-"]], sel: null };
+}
+
+function renderTableBuilderTab(container) {
+  if (!tableBuilder) tableBuilder = newTableBuilder();
+  container.innerHTML = '<p class="hint" style="margin-bottom:10px">Впиши "-" в клетку, чтобы заблокировать её (например, диагональ). ' +
+    "Наведи на край таблицы — появится «+» (добавить столбец/строку). Выдели клетку и нажми Ctrl+→/↓, чтобы добавить столбец/строку с этой стороны, Ctrl+←/↑ — убрать последний.</p>" +
+    '<div id="tbuildHost"></div>';
+  refreshTableBuilder();
+}
+
+function tableBuilderHtml() {
+  const tb = tableBuilder;
+  let html = '<div class="tbuild-wrap"><table class="tbuild-table"><thead><tr><th class="tbuild-corner"></th>';
+  tb.cols.forEach((c, j) => { html += '<th><input class="tbuild-head" data-axis="col" data-idx="' + j + '" value="' + esc(c) + '"></th>'; });
+  html += '<th class="tbuild-addcol" data-add="col" title="Добавить столбец">+</th></tr></thead><tbody>';
+  tb.rows.forEach((r, i) => {
+    html += '<tr><th><input class="tbuild-head" data-axis="row" data-idx="' + i + '" value="' + esc(r) + '"></th>';
+    tb.cols.forEach((c, j) => {
+      const v = tb.cells[i][j];
+      const blocked = v === "-" || v === "—";
+      html += '<td><input class="tbuild-cell' + (blocked ? " tbuild-blocked" : "") + '" data-r="' + i + '" data-c="' + j + '" value="' + esc(v) + '" maxlength="8"></td>';
+    });
+    html += "</tr>";
+  });
+  html += '<tr><td></td><td class="tbuild-addrow" data-add="row" colspan="' + tb.cols.length + '" title="Добавить строку">+</td></tr>';
+  html += "</tbody></table>";
+  html += '<div class="itable-controls"><button class="btn btn-sm" id="tbClearBtn">Сбросить</button></div>';
+  html += '<textarea id="tbExport" class="itable-export" readonly rows="' + (tb.rows.length + 3) + '"></textarea>' +
+    '<button class="btn btn-sm" id="tbCopyBtn">📋 Скопировать блок для урока</button>';
+  html += "</div>";
+  return html;
+}
+
+function refreshTableBuilder() {
+  const host = document.getElementById("tbuildHost");
+  if (!host) return;
+  host.innerHTML = tableBuilderHtml();
+  wireTableBuilder(host);
+  if (tableBuilder.sel) {
+    const el = host.querySelector('.tbuild-cell[data-r="' + tableBuilder.sel.r + '"][data-c="' + tableBuilder.sel.c + '"]');
+    if (el) el.focus();
+  }
+}
+
+function tableBuilderExportText() {
+  const tb = tableBuilder;
+  const opts = JSON.stringify({ cols: tb.cols, rows: tb.rows });
+  const body = tb.cells.map(row => row.join(",")).join("\n");
+  return "```table " + opts + "\n" + body + "\n```";
+}
+
+function updateTableBuilderExport() {
+  const ta = document.getElementById("tbExport");
+  if (ta) ta.value = tableBuilderExportText();
+}
+
+function tableBuilderAddCol() { const tb = tableBuilder; tb.cols.push(nextCyrillicLabel(tb.cols.length)); tb.cells.forEach(row => row.push("")); refreshTableBuilder(); }
+function tableBuilderAddRow() { const tb = tableBuilder; tb.rows.push(nextCyrillicLabel(tb.rows.length)); tb.cells.push(tb.cols.map(() => "")); refreshTableBuilder(); }
+function tableBuilderRemoveCol() { const tb = tableBuilder; if (tb.cols.length <= 1) return; tb.cols.pop(); tb.cells.forEach(row => row.pop()); refreshTableBuilder(); }
+function tableBuilderRemoveRow() { const tb = tableBuilder; if (tb.rows.length <= 1) return; tb.rows.pop(); tb.cells.pop(); refreshTableBuilder(); }
+
+function wireTableBuilder(host) {
+  const tb = tableBuilder;
+  host.querySelectorAll(".tbuild-head").forEach(inp => {
+    inp.oninput = () => { (inp.dataset.axis === "col" ? tb.cols : tb.rows)[Number(inp.dataset.idx)] = inp.value; updateTableBuilderExport(); };
+  });
+  host.querySelectorAll(".tbuild-cell").forEach(inp => {
+    inp.oninput = () => {
+      tb.cells[Number(inp.dataset.r)][Number(inp.dataset.c)] = inp.value;
+      inp.classList.toggle("tbuild-blocked", inp.value === "-" || inp.value === "—");
+      updateTableBuilderExport();
+    };
+    inp.onfocus = () => { tb.sel = { r: Number(inp.dataset.r), c: Number(inp.dataset.c) }; };
+    inp.onkeydown = (e) => {
+      if (!e.ctrlKey) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); tableBuilderAddCol(); }
+      else if (e.key === "ArrowDown") { e.preventDefault(); tableBuilderAddRow(); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); tableBuilderRemoveCol(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); tableBuilderRemoveRow(); }
+    };
+  });
+  const addCol = host.querySelector('[data-add="col"]');
+  if (addCol) addCol.onclick = () => tableBuilderAddCol();
+  const addRow = host.querySelector('[data-add="row"]');
+  if (addRow) addRow.onclick = () => tableBuilderAddRow();
+  const clearBtn = host.querySelector("#tbClearBtn");
+  if (clearBtn) clearBtn.onclick = () => { if (confirm("Сбросить таблицу?")) { tableBuilder = newTableBuilder(); refreshTableBuilder(); } };
+  const copyBtn = host.querySelector("#tbCopyBtn");
+  if (copyBtn) copyBtn.onclick = () => { copyText(document.getElementById("tbExport").value).then(ok => toast(ok ? "Скопировано!" : "Не удалось скопировать")); };
+  updateTableBuilderExport();
 }
 
 function renderReview() {

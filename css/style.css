@@ -425,3 +425,51 @@ main.app-wide { max-width: 1400px; }
 .itable-controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
 .itable-status { font-size: 0.88rem; color: var(--text-dim); }
 .itable-undo-btn[hidden] { display: none; }
+
+/* ---------------- Песочница: вкладки + конструкторы графов/таблиц ---------------- */
+.sandbox-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.sandbox-tab.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+.itable-export {
+  width: 100%; max-width: 640px; display: block; margin: 10px 0 8px;
+  background: #12141b; color: #d7dae5; border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 12px; font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.82rem;
+  resize: vertical;
+}
+
+/* конструктор графов */
+.gbuild-check { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 0.9rem; color: var(--text-dim); }
+.gbuild-host {
+  border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg2);
+  max-width: 640px; overflow: hidden;
+}
+.gbuild-svg { width: 100%; height: auto; display: block; cursor: crosshair; touch-action: none; }
+.gbuild-vertex { cursor: grab; }
+.gbuild-edge { cursor: pointer; }
+.gbuild-exportmode { display: flex; gap: 6px; }
+.gbuild-exportmode .btn.active { border-color: var(--accent2); background: var(--accent2); color: #08110f; }
+
+/* конструктор таблиц */
+.tbuild-wrap { max-width: 640px; }
+.tbuild-table { border-collapse: collapse; }
+.tbuild-table th, .tbuild-table td { border: 1px solid var(--border); padding: 3px; text-align: center; }
+.tbuild-table th { background: var(--bg3); }
+.tbuild-corner { background: transparent !important; border: none !important; }
+.tbuild-head {
+  width: 64px; text-align: center; background: var(--bg3); color: var(--text); font-weight: 600;
+  border: 1px solid transparent; border-radius: 5px; padding: 4px 2px; font-size: 0.85rem;
+}
+.tbuild-head:focus { outline: none; border-color: var(--accent); }
+.tbuild-cell {
+  width: 56px; text-align: center; background: var(--bg2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 5px; padding: 4px 2px; font-size: 0.88rem;
+  font-family: "JetBrains Mono", Consolas, monospace;
+}
+.tbuild-cell:focus { outline: none; border-color: var(--accent); }
+.tbuild-cell.tbuild-blocked { color: var(--text-dim); background: var(--bg3); }
+.tbuild-addcol, .tbuild-addrow {
+  color: var(--text-dim); cursor: pointer; opacity: 0.35; transition: opacity 0.15s, color 0.15s;
+  font-weight: 700; user-select: none;
+}
+.tbuild-wrap:hover .tbuild-addcol, .tbuild-wrap:hover .tbuild-addrow { opacity: 1; }
+.tbuild-addcol:hover, .tbuild-addrow:hover { color: var(--accent); background: var(--bg3); }
