@@ -467,6 +467,61 @@ function copyFallback(text) {
   return ok;
 }
 
+/* ---------------- свои модальные диалоги (замена confirm()/prompt() браузера) ----------------
+ * Нативные confirm()/prompt() браузер может заблокировать (после нескольких подряд
+ * показывает чекбокс "не показывать больше диалоги на этой странице" — пользователь
+ * может случайно его отметить, и дальше функция молча возвращает false/null без
+ * всякой видимой причины, кнопки как будто перестают работать). Свои диалоги этой
+ * проблемы не имеют и визуально вписаны в тему приложения. */
+
+function showModal(bodyHtml, wireFn) {
+  return new Promise(resolve => {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = '<div class="modal-box">' + bodyHtml + "</div>";
+    document.body.appendChild(overlay);
+    const close = (result) => {
+      overlay.remove();
+      document.removeEventListener("keydown", onEsc);
+      resolve(result);
+    };
+    const onEsc = (e) => { if (e.key === "Escape") close(null); };
+    document.addEventListener("keydown", onEsc);
+    overlay.addEventListener("mousedown", (e) => { if (e.target === overlay) close(null); });
+    wireFn(overlay, close);
+  });
+}
+
+function askConfirm(message, okLabel) {
+  return showModal(
+    '<p class="modal-msg">' + esc(message) + '</p>' +
+    '<div class="modal-actions"><button class="btn" data-cancel>Отмена</button>' +
+    '<button class="btn btn-accent" data-ok>' + esc(okLabel || "Да") + "</button></div>",
+    (overlay, close) => {
+      overlay.querySelector("[data-cancel]").onclick = () => close(false);
+      const okBtn = overlay.querySelector("[data-ok]");
+      okBtn.onclick = () => close(true);
+      okBtn.focus();
+    }
+  ).then(r => r === true);
+}
+
+function askPrompt(message, defaultValue) {
+  return showModal(
+    '<p class="modal-msg">' + esc(message) + '</p>' +
+    '<input type="text" class="modal-input" data-input value="' + esc(defaultValue || "") + '">' +
+    '<div class="modal-actions"><button class="btn" data-cancel>Отмена</button><button class="btn btn-accent" data-ok>OK</button></div>',
+    (overlay, close) => {
+      const input = overlay.querySelector("[data-input]");
+      overlay.querySelector("[data-cancel]").onclick = () => close(null);
+      overlay.querySelector("[data-ok]").onclick = () => close(input.value);
+      input.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); close(input.value); } };
+      input.focus();
+      input.select();
+    }
+  );
+}
+
 function slugify(s) {
   const map = { а:"a",б:"b",в:"v",г:"g",д:"d",е:"e",ё:"e",ж:"zh",з:"z",и:"i",й:"y",к:"k",л:"l",м:"m",н:"n",о:"o",п:"p",р:"r",с:"s",т:"t",у:"u",ф:"f",х:"h",ц:"c",ч:"ch",ш:"sh",щ:"sch",ъ:"",ы:"y",ь:"",э:"e",ю:"yu",я:"ya" };
   const base = s.toLowerCase().split("").map(ch => map[ch] !== undefined ? map[ch] : ch).join("")
@@ -1167,8 +1222,8 @@ function renderCourse(cid) {
     if (!cards.length) { toast("В этом курсе пока нет карточек"); return; }
     copyCards(cards, "remnote");
   };
-  document.getElementById("delCourseBtn").onclick = () => {
-    if (!confirm('Удалить курс «' + course.title + '» со всеми уроками?')) return;
+  document.getElementById("delCourseBtn").onclick = async () => {
+    if (!await askConfirm('Удалить курс «' + course.title + '» со всеми уроками?', "Удалить")) return;
     deleteEntity(course.id);
     location.hash = "#/";
   };
@@ -1176,8 +1231,8 @@ function renderCourse(cid) {
     b.onclick = () => openLessonEditor(course.id, b.dataset.addLesson, null);
   });
   document.querySelectorAll("[data-del-module]").forEach(b => {
-    b.onclick = () => {
-      if (!confirm("Удалить модуль со всеми уроками?")) return;
+    b.onclick = async () => {
+      if (!await askConfirm("Удалить модуль со всеми уроками?", "Удалить")) return;
       deleteEntity(keyOf(course.id, b.dataset.delModule));
       renderCourse(course.id);
     };
@@ -1385,8 +1440,8 @@ function renderLesson(cid, mid, lid) {
   const cardsAnkiBtn = document.getElementById("cardsAnkiBtn");
   if (cardsAnkiBtn) cardsAnkiBtn.onclick = () => copyCards(lesson.cards, "anki");
   document.getElementById("editLessonBtn").onclick = () => openLessonEditor(cid, mid, lesson);
-  document.getElementById("delLessonBtn").onclick = () => {
-    if (!confirm('Удалить урок «' + lesson.title + '»?')) return;
+  document.getElementById("delLessonBtn").onclick = async () => {
+    if (!await askConfirm('Удалить урок «' + lesson.title + '»?', "Удалить")) return;
     deleteEntity(key);
     location.hash = "#/course/" + encodeURIComponent(cid);
   };
@@ -1614,8 +1669,8 @@ function renderPracticeProblem() {
   });
 
   const resetBtn = document.getElementById("resetCodeBtn");
-  if (resetBtn) resetBtn.onclick = () => {
-    if (!confirm("Стереть текущий код и вернуть заготовку?")) return;
+  if (resetBtn) resetBtn.onclick = async () => {
+    if (!await askConfirm("Стереть текущий код и вернуть заготовку?", "Стереть")) return;
     cmEditor.setValue(problem.starterCode);
     saveCurrentEditorCode();
   };
@@ -1853,9 +1908,9 @@ function renderGeogebraSandboxTab(container) {
     '<p class="hint" style="margin-bottom:12px">Полноценная GeoGebra: строй что угодно — графики, чертежи, вычисления. Сохраняется автоматически в этом браузере.</p>' +
     '<div id="sandboxHost" style="width:100%;height:75vh;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)"></div>';
 
-  document.getElementById("sandboxClearBtn").onclick = () => {
+  document.getElementById("sandboxClearBtn").onclick = async () => {
     if (!window.sandboxApi) return;
-    if (!confirm("Стереть всё построение в песочнице?")) return;
+    if (!await askConfirm("Стереть всё построение в песочнице?", "Стереть")) return;
     sandboxApi.reset();
     sandboxGgb = ""; saveSandboxGgb();
   };
@@ -1928,8 +1983,8 @@ function renderGraphBuilderTab(container) {
     '<button class="btn btn-sm" id="gbCopyBtn">📋 Скопировать блок для урока</button>';
 
   document.getElementById("gbDirected").onchange = (e) => { graphBuilder.directed = e.target.checked; refreshGraphBuilder(); };
-  document.getElementById("gbClearBtn").onclick = () => {
-    if (!confirm("Стереть граф?")) return;
+  document.getElementById("gbClearBtn").onclick = async () => {
+    if (!await askConfirm("Стереть граф?", "Стереть")) return;
     graphBuilder = newGraphBuilder();
     refreshGraphBuilder();
   };
@@ -2075,32 +2130,38 @@ function onGraphBuilderCanvasClick(pt) {
   refreshGraphBuilder();
 }
 
-function onGraphBuilderVertexClick(vid) {
+async function onGraphBuilderVertexClick(vid) {
   const gb = graphBuilder;
   if (gb.selected === null) {
     gb.selected = vid;
+    refreshGraphBuilder();
   } else if (gb.selected === vid) {
     gb.selected = null;
+    refreshGraphBuilder();
   } else {
-    const exists = gb.edges.some(e => (e.from === gb.selected && e.to === vid) || (!gb.directed && e.from === vid && e.to === gb.selected));
+    const from = gb.selected;
+    gb.selected = null; // снимаем подсветку сразу, не дожидаясь ответа на вопрос о весе
+    refreshGraphBuilder();
+    const exists = gb.edges.some(e => (e.from === from && e.to === vid) || (!gb.directed && e.from === vid && e.to === from));
     if (!exists) {
-      const w = prompt("Вес ребра (необязательно, оставь пустым):", "");
-      if (w !== null) gb.edges.push({ id: "e" + Math.random().toString(36).slice(2, 8), from: gb.selected, to: vid, weight: w.trim(), color: null });
+      const w = await askPrompt("Вес ребра (необязательно, оставь пустым):", "");
+      if (w !== null) {
+        gb.edges.push({ id: "e" + Math.random().toString(36).slice(2, 8), from, to: vid, weight: w.trim(), color: null });
+        refreshGraphBuilder();
+      }
     }
-    gb.selected = null;
   }
-  refreshGraphBuilder();
 }
 
-function onGraphBuilderVertexRename(vid) {
+async function onGraphBuilderVertexRename(vid) {
   const v = graphBuilder.vertices.find(x => x.id === vid);
   if (!v) return;
-  const name = prompt("Название вершины:", v.label);
+  const name = await askPrompt("Название вершины:", v.label);
   if (name !== null && name.trim()) { v.label = name.trim(); refreshGraphBuilder(); }
 }
 
-function onGraphBuilderVertexDelete(vid) {
-  if (!confirm("Удалить вершину и все её рёбра?")) return;
+async function onGraphBuilderVertexDelete(vid) {
+  if (!await askConfirm("Удалить вершину и все её рёбра?", "Удалить")) return;
   const gb = graphBuilder;
   gb.vertices = gb.vertices.filter(v => v.id !== vid);
   gb.edges = gb.edges.filter(e => e.from !== vid && e.to !== vid);
@@ -2108,15 +2169,15 @@ function onGraphBuilderVertexDelete(vid) {
   refreshGraphBuilder();
 }
 
-function onGraphBuilderEdgeClick(eid) {
+async function onGraphBuilderEdgeClick(eid) {
   const e = graphBuilder.edges.find(x => x.id === eid);
   if (!e) return;
-  const w = prompt("Вес ребра (оставь пустым, если без веса):", e.weight || "");
+  const w = await askPrompt("Вес ребра (оставь пустым, если без веса):", e.weight || "");
   if (w !== null) { e.weight = w.trim(); refreshGraphBuilder(); }
 }
 
-function onGraphBuilderEdgeDelete(eid) {
-  if (!confirm("Удалить ребро?")) return;
+async function onGraphBuilderEdgeDelete(eid) {
+  if (!await askConfirm("Удалить ребро?", "Удалить")) return;
   graphBuilder.edges = graphBuilder.edges.filter(x => x.id !== eid);
   refreshGraphBuilder();
 }
@@ -2213,7 +2274,7 @@ function wireTableBuilder(host) {
   const addRow = host.querySelector('[data-add="row"]');
   if (addRow) addRow.onclick = () => tableBuilderAddRow();
   const clearBtn = host.querySelector("#tbClearBtn");
-  if (clearBtn) clearBtn.onclick = () => { if (confirm("Сбросить таблицу?")) { tableBuilder = newTableBuilder(); refreshTableBuilder(); } };
+  if (clearBtn) clearBtn.onclick = async () => { if (await askConfirm("Сбросить таблицу?", "Сбросить")) { tableBuilder = newTableBuilder(); refreshTableBuilder(); } };
   const copyBtn = host.querySelector("#tbCopyBtn");
   if (copyBtn) copyBtn.onclick = () => { copyText(document.getElementById("tbExport").value).then(ok => toast(ok ? "Скопировано!" : "Не удалось скопировать")); };
   updateTableBuilderExport();
@@ -2432,8 +2493,8 @@ function renderSettings() {
     saveUser();
     toast("Встроенный контент восстановлен");
   };
-  document.getElementById("resetBtn").onclick = () => {
-    if (!confirm("Точно сбросить весь прогресс и статистику?")) return;
+  document.getElementById("resetBtn").onclick = async () => {
+    if (!await askConfirm("Точно сбросить весь прогресс и статистику?", "Сбросить")) return;
     progress = {}; visits = {};
     saveProgress(); saveVisits();
     toast("Прогресс сброшен");

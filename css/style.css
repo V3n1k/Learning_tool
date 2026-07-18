@@ -473,3 +473,20 @@ main.app-wide { max-width: 1400px; }
 }
 .tbuild-wrap:hover .tbuild-addcol, .tbuild-wrap:hover .tbuild-addrow { opacity: 1; }
 .tbuild-addcol:hover, .tbuild-addrow:hover { color: var(--accent); background: var(--bg3); }
+
+/* ---------------- свои модальные диалоги (вместо confirm()/prompt()) ---------------- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10, 11, 16, 0.6);
+  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+}
+.modal-box {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 22px; max-width: 380px; width: 100%; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+.modal-msg { margin-bottom: 14px; line-height: 1.5; }
+.modal-input {
+  width: 100%; background: var(--bg3); color: var(--text); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 10px; font-size: 0.95rem; font-family: inherit; margin-bottom: 14px;
+}
+.modal-input:focus { outline: none; border-color: var(--accent); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
