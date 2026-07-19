@@ -870,6 +870,11 @@ function itableCellInput(extraAttrs) {
   return '<span class="icell"><input class="itable-cell" ' + extraAttrs + ' autocomplete="off"><small class="iwas"></small></span>';
 }
 
+function autoSizeItableCell(inp) {
+  // моноширинный шрифт — ширину удобно считать в ch по длине содержимого (+запас на padding)
+  inp.style.width = Math.min(22, Math.max(3.5, inp.value.length + 2)) + "ch";
+}
+
 function truthTableHtml(expr, options) {
   const vars = (options.vars && options.vars.length) ? options.vars : boolVarsOf(expr);
   if (!vars.length) return '<p class="hint">Не удалось определить переменные выражения.</p>';
@@ -949,7 +954,7 @@ function tableHtml(options, bodyText) {
     html += "<tr><th>" + esc(rLabel) + "</th>" + cols.map((c, j) => {
       const cell = (answer[i] && answer[i][j]) || { blocked: true, value: "" };
       return cell.blocked ? '<td class="itable-diag">—</td>' :
-        "<td>" + itableCellInput('data-row="' + i + '" data-col="' + j + '" maxlength="8"') + "</td>";
+        "<td>" + itableCellInput('data-row="' + i + '" data-col="' + j + '" maxlength="24"') + "</td>";
     }).join("") + "</tr>";
   });
   html += "</tbody></table>" + itableControls(id) + "</div>";
@@ -1012,6 +1017,7 @@ function revealInteractiveTable(id) {
     const prevVal = inp.value.trim();
     const expected = cellExpectedStr(ans, row, col);
     inp.value = expected;
+    autoSizeItableCell(inp);
     inp.classList.remove("itable-bad");
     inp.classList.add("itable-ok");
     const was = inp.parentElement.querySelector(".iwas");
@@ -1035,6 +1041,7 @@ function restoreInteractiveTable(id) {
   const inputs = Array.from(wrap.querySelectorAll("input.itable-cell"));
   inputs.forEach((inp, i) => {
     inp.value = prev[i] || "";
+    autoSizeItableCell(inp);
     inp.classList.remove("itable-ok", "itable-bad", "itable-diff");
     const was = inp.parentElement.querySelector(".iwas");
     if (was) { was.textContent = ""; was.classList.remove("show"); }
@@ -1050,6 +1057,7 @@ function resetInteractiveTable(id) {
   if (!wrap) return;
   wrap.querySelectorAll("input.itable-cell").forEach(inp => {
     inp.value = "";
+    autoSizeItableCell(inp);
     inp.classList.remove("itable-ok", "itable-bad", "itable-diff");
     const was = inp.parentElement.querySelector(".iwas");
     if (was) { was.textContent = ""; was.classList.remove("show"); }
@@ -1080,6 +1088,13 @@ function wireInteractiveTables(container) {
     if (btn._wired) return;
     btn._wired = true;
     btn.onclick = () => restoreInteractiveTable(btn.dataset.undoTable);
+  });
+  // ячейки таблиц расширяются по мере ввода
+  container.querySelectorAll("input.itable-cell").forEach(inp => {
+    if (inp._sizeWired) return;
+    inp._sizeWired = true;
+    autoSizeItableCell(inp);
+    inp.addEventListener("input", () => autoSizeItableCell(inp));
   });
   // виджеты курса английского
   container.querySelectorAll("[data-flip-card]").forEach(el => {

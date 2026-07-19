@@ -411,8 +411,8 @@ main.app-wide { max-width: 1400px; }
 .itable-diag { color: var(--text-dim); background: var(--bg3); }
 .icell { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
 .itable-cell {
-  width: 44px; text-align: center; background: var(--bg2); color: var(--text);
-  border: 1px solid var(--border); border-radius: 6px; padding: 4px 2px; font-size: 0.9rem;
+  min-width: 3.5ch; width: 4ch; max-width: 22ch; text-align: center; background: var(--bg2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; font-size: 0.9rem;
   font-family: "JetBrains Mono", Consolas, monospace;
 }
 .itable-cell:focus { outline: none; border-color: var(--accent); }
