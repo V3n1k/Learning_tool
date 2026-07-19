@@ -426,6 +426,47 @@ main.app-wide { max-width: 1400px; }
 .itable-status { font-size: 0.88rem; color: var(--text-dim); }
 .itable-undo-btn[hidden] { display: none; }
 
+/* ---------------- виджеты курса английского ---------------- */
+.eng-flashcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin: 16px 0; }
+.eng-flip { perspective: 900px; height: 154px; cursor: pointer; outline: none; }
+.eng-flip-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s; transform-style: preserve-3d; }
+.eng-flip.flipped .eng-flip-inner { transform: rotateY(180deg); }
+.eng-flip:focus-visible .eng-flip-inner { box-shadow: 0 0 0 2px var(--accent); border-radius: 14px; }
+.eng-flip-face { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; border: 1px solid var(--border); border-radius: 14px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; background: var(--bg2); box-sizing: border-box; }
+.eng-flip-back { transform: rotateY(180deg); background: var(--bg3); }
+.eng-flip-lang { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--accent2); }
+.eng-flip-lang-ru { color: var(--accent); }
+.eng-flip-word { font-size: 1.4rem; font-weight: 700; margin-top: 4px; }
+.eng-flip-ipa { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.85rem; color: var(--text-dim); margin-top: 3px; }
+.eng-flip-ru { font-size: 1.1rem; font-weight: 600; margin-top: 4px; }
+.eng-flip-ex { font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; margin-top: 6px; }
+.eng-flip-hint { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.62rem; color: var(--text-dim); opacity: 0.65; }
+
+.eng-grammar { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin: 16px 0; }
+.eng-grammar-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; }
+.eng-grammar-formula { display: inline-block; font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.9rem; color: var(--accent2); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; margin-bottom: 12px; }
+.eng-grammar-desc { font-size: 0.95rem; color: var(--text-dim); line-height: 1.55; margin: 0 0 12px; }
+.eng-grammar-ex { font-size: 0.95rem; padding: 8px 12px; border-radius: 8px; background: var(--bg); border-left: 2px solid var(--accent2); margin: 6px 0; }
+
+.eng-quiz, .eng-blank { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin: 16px 0; }
+.eng-quiz-q { font-size: 1rem; font-weight: 600; margin-bottom: 14px; line-height: 1.5; }
+.eng-quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+.eng-quiz-opt { text-align: left; padding: 10px 14px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.95rem; cursor: pointer; font-family: inherit; transition: border-color 0.15s, background 0.15s; }
+.eng-quiz-opt:hover { border-color: var(--accent); }
+.eng-quiz-opt.eng-opt-correct { border-color: var(--green); background: rgba(76, 175, 125, 0.14); }
+.eng-quiz-opt.eng-opt-wrong { border-color: var(--red); background: rgba(224, 92, 92, 0.12); }
+.eng-quiz-result, .eng-blank-result { font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.85rem; }
+.eng-quiz-result { margin-top: 12px; min-height: 1em; }
+.eng-res-ok { color: var(--green); }
+.eng-res-bad { color: var(--red); }
+
+.eng-blank-sentence { font-size: 1rem; line-height: 2; margin-bottom: 14px; }
+.eng-blank-input { display: inline-block; min-width: 92px; text-align: center; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-family: "JetBrains Mono", Consolas, monospace; font-size: 0.9rem; }
+.eng-blank-input:focus { outline: none; border-color: var(--accent); }
+.eng-blank-input.eng-blank-ok { border-color: var(--green); background: rgba(76, 175, 125, 0.14); }
+.eng-blank-input.eng-blank-bad { border-color: var(--red); background: rgba(224, 92, 92, 0.12); }
+.eng-blank-controls { display: flex; align-items: center; gap: 14px; }
+
 /* ---------------- Песочница: вкладки + конструкторы графов/таблиц ---------------- */
 .sandbox-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .sandbox-tab.active { border-color: var(--accent); background: var(--accent); color: #fff; }

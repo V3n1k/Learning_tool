@@ -384,6 +384,34 @@ function renderMd(text, graphSpecs) {
         continue;
       }
 
+      if (lang === "flashcards") {
+        // флеш-карточки-перевёртыши (курс английского): строки "en | ipa | ru | пример"
+        out.push(flashcardsHtml(unesc(buf.join("\n"))));
+        continue;
+      }
+
+      if (lang === "grammar") {
+        // грамматическая карточка: options {title, formula}; тело — описание + примеры (строки "* ...")
+        let options = {};
+        if (restOfLine) {
+          try { options = JSON.parse(unesc(restOfLine)); } catch (e) { /* по умолчанию */ }
+        }
+        out.push(grammarHtml(options, unesc(buf.join("\n"))));
+        continue;
+      }
+
+      if (lang === "quiz") {
+        // вопрос с выбором ответа: тело — вопрос, затем варианты ("+ верный" / "- неверный")
+        out.push(quizHtml(unesc(buf.join("\n"))));
+        continue;
+      }
+
+      if (lang === "blank") {
+        // вставь пропущенное слово: тело — предложение с ___, затем строки "= ответ | вариант"
+        out.push(blankHtml(unesc(buf.join("\n"))));
+        continue;
+      }
+
       // сопоставляем частые обозначения с классами языков, которые понимает Prism
       const langClass = { go: "go", python: "python", py: "python", bash: "bash", sh: "bash" }[lang] || "";
       const codeClass = langClass ? ' class="language-' + langClass + '"' : "";
@@ -1053,6 +1081,155 @@ function wireInteractiveTables(container) {
     btn._wired = true;
     btn.onclick = () => restoreInteractiveTable(btn.dataset.undoTable);
   });
+  // виджеты курса английского
+  container.querySelectorAll("[data-flip-card]").forEach(el => {
+    if (el._wired) return;
+    el._wired = true;
+    el.onclick = () => el.classList.toggle("flipped");
+    el.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); el.classList.toggle("flipped"); }
+    });
+  });
+  container.querySelectorAll("[data-quiz-opt]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => selectQuizOption(btn.dataset.quizOpt, Number(btn.dataset.idx));
+  });
+  container.querySelectorAll("[data-blank-check]").forEach(btn => {
+    if (btn._wired) return;
+    btn._wired = true;
+    btn.onclick = () => checkBlank(btn.dataset.blankCheck);
+  });
+  container.querySelectorAll("[data-blank-input]").forEach(inp => {
+    if (inp._wired) return;
+    inp._wired = true;
+    inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); checkBlank(inp.dataset.blankInput); } });
+  });
+}
+
+/* ---------------- виджеты курса английского ---------------- */
+
+function flashcardsHtml(bodyText) {
+  const cards = bodyText.split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+    const p = l.split("|").map(s => s.trim());
+    return { en: p[0] || "", ipa: p[1] || "", ru: p[2] || "", example: p[3] || "" };
+  }).filter(c => c.en);
+  if (!cards.length) return '<p class="hint">Нет карточек.</p>';
+  let html = '<div class="eng-flashcards">';
+  cards.forEach(c => {
+    html += '<div class="eng-flip" data-flip-card="1" tabindex="0"><div class="eng-flip-inner">' +
+      '<div class="eng-flip-face eng-flip-front">' +
+        '<div class="eng-flip-lang">EN</div>' +
+        '<div class="eng-flip-word">' + esc(c.en) + '</div>' +
+        (c.ipa ? '<div class="eng-flip-ipa">' + esc(c.ipa) + '</div>' : '') +
+        '<div class="eng-flip-hint">нажми, чтобы перевернуть</div>' +
+      '</div>' +
+      '<div class="eng-flip-face eng-flip-back">' +
+        '<div class="eng-flip-lang eng-flip-lang-ru">RU</div>' +
+        '<div class="eng-flip-ru">' + esc(c.ru) + '</div>' +
+        (c.example ? '<div class="eng-flip-ex">' + inlineMd(c.example) + '</div>' : '') +
+      '</div>' +
+    '</div></div>';
+  });
+  return html + '</div>';
+}
+
+function grammarHtml(options, bodyText) {
+  const title = options.title || "";
+  const formula = options.formula || "";
+  const lines = bodyText.split("\n").map(l => l.replace(/\s+$/, "")).filter(l => l.trim() !== "");
+  const desc = [], examples = [];
+  for (const l of lines) {
+    const m = l.match(/^\s*\*\s+(.*)$/);
+    if (m) examples.push(m[1]); else desc.push(l.trim());
+  }
+  let html = '<div class="eng-grammar">';
+  if (title) html += '<div class="eng-grammar-title">' + esc(title) + '</div>';
+  if (formula) html += '<div class="eng-grammar-formula">' + esc(formula) + '</div>';
+  if (desc.length) html += '<p class="eng-grammar-desc">' + inlineMd(desc.join(" ")) + '</p>';
+  examples.forEach(e => { html += '<div class="eng-grammar-ex">' + inlineMd(e) + '</div>'; });
+  return html + '</div>';
+}
+
+function quizHtml(bodyText) {
+  const lines = bodyText.split("\n").map(l => l.replace(/\s+$/, "")).filter(l => l.trim() !== "");
+  const question = [], opts = [];
+  for (const l of lines) {
+    const m = l.match(/^\s*([+\-])\s+(.*)$/);
+    if (m) opts.push({ text: m[2], correct: m[1] === "+" }); else question.push(l.trim());
+  }
+  if (!opts.length) return '<p class="hint">Пустой вопрос.</p>';
+  const id = "quiz-" + Math.random().toString(36).slice(2, 10);
+  const correctIndex = opts.findIndex(o => o.correct);
+  interactiveAnswers.set(id, { type: "quiz", correctIndex, options: opts.map(o => o.text) });
+  let html = '<div class="eng-quiz" data-quiz="' + id + '"><div class="eng-quiz-q">' + inlineMd(question.join(" ")) + '</div><div class="eng-quiz-opts">';
+  opts.forEach((o, i) => {
+    html += '<button class="eng-quiz-opt" data-quiz-opt="' + id + '" data-idx="' + i + '">' + inlineMd(o.text) + '</button>';
+  });
+  return html + '</div><div class="eng-quiz-result" data-quiz-result="' + id + '"></div></div>';
+}
+
+function selectQuizOption(id, idx) {
+  const ans = interactiveAnswers.get(id);
+  const wrap = document.querySelector('[data-quiz="' + id + '"]');
+  if (!ans || !wrap) return;
+  wrap.querySelectorAll(".eng-quiz-opt").forEach((o, i) => {
+    o.classList.remove("eng-opt-correct", "eng-opt-wrong");
+    if (i === ans.correctIndex) o.classList.add("eng-opt-correct");
+    else if (i === idx) o.classList.add("eng-opt-wrong");
+  });
+  const correct = idx === ans.correctIndex;
+  const res = wrap.querySelector('[data-quiz-result="' + id + '"]');
+  if (res) {
+    res.textContent = correct ? "✓ Верно!" : "✗ Правильный ответ: " + ans.options[ans.correctIndex];
+    res.className = "eng-quiz-result " + (correct ? "eng-res-ok" : "eng-res-bad");
+  }
+}
+
+function blankHtml(bodyText) {
+  const lines = bodyText.split("\n").map(l => l.replace(/\s+$/, "")).filter(l => l.trim() !== "");
+  const answers = [], sentenceParts = [];
+  for (const l of lines) {
+    const m = l.match(/^\s*=\s*(.*)$/);
+    if (m) answers.push(m[1].split("|").map(s => s.trim().toLowerCase()).filter(Boolean));
+    else sentenceParts.push(l.trim());
+  }
+  const sentence = sentenceParts.join(" ");
+  const blanks = (sentence.match(/___+/g) || []).length;
+  if (!blanks || !answers.length) return '<p class="hint">Пустое упражнение.</p>';
+  const id = "blank-" + Math.random().toString(36).slice(2, 10);
+  interactiveAnswers.set(id, { type: "blank", answers });
+  const segs = sentence.split(/(___+)/);
+  let bi = 0, sentenceHtml = "";
+  for (const seg of segs) {
+    if (/^___+$/.test(seg)) sentenceHtml += '<input class="eng-blank-input" data-blank-input="' + id + '" data-idx="' + (bi++) + '" placeholder="…">';
+    else sentenceHtml += inlineMd(seg);
+  }
+  return '<div class="eng-blank" data-blank="' + id + '"><div class="eng-blank-sentence">' + sentenceHtml + '</div>' +
+    '<div class="eng-blank-controls"><button class="btn btn-sm btn-accent" data-blank-check="' + id + '">Проверить</button>' +
+    '<span class="eng-blank-result" data-blank-result="' + id + '"></span></div></div>';
+}
+
+function checkBlank(id) {
+  const ans = interactiveAnswers.get(id);
+  const wrap = document.querySelector('[data-blank="' + id + '"]');
+  if (!ans || !wrap) return;
+  let ok = 0, tot = 0;
+  wrap.querySelectorAll(".eng-blank-input").forEach(inp => {
+    const idx = Number(inp.dataset.idx);
+    const accepted = ans.answers[idx] || [];
+    tot++;
+    const good = accepted.includes(inp.value.trim().toLowerCase());
+    if (good) ok++;
+    inp.classList.toggle("eng-blank-ok", good);
+    inp.classList.toggle("eng-blank-bad", !good);
+  });
+  const res = wrap.querySelector('[data-blank-result="' + id + '"]');
+  if (res) {
+    const all = ok === tot;
+    res.textContent = all ? "✓ Верно!" : ok + " из " + tot + " · ответ: " + ans.answers.map(a => a[0]).join(", ");
+    res.className = "eng-blank-result " + (all ? "eng-res-ok" : "eng-res-bad");
+  }
 }
 
 /* ---------------- карточки: RemNote / Anki ---------------- */
