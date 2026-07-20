@@ -426,6 +426,250 @@ probably | /ˈprɑːbəbli/ | вероятно, наверное | I'll probably
           ]
         }
       ]
+    },
+    {
+      id: "modals",
+      title: "Модуль 2. Модальные глаголы",
+      lessons: [
+        {
+          id: "eng-06",
+          title: "Can, could, be able to",
+          theory: `
+## Способность, разрешение, просьба
+
+\`\`\`grammar {"title":"can / could","formula":"can / could + V1 (без to)"}
+* I **can swim**. — умею сейчас
+* At five I **could read**. — общая способность в прошлом
+* **Could** you help me? — вежливая просьба
+* **Can** I sit here? — неформальное разрешение
+\`\`\`
+
+\`\`\`grammar {"title":"be able to","formula":"am / is / are / was / will be + able to + V1"}
+Значит то же «уметь/смочь», но работает во ВСЕХ временах — там, где у can/could формы нет.
+* I **will be able to** come tomorrow. — будущее (нельзя «will can»)
+* I **have been able to** save some money. — Perfect
+\`\`\`
+
+## Ключевые правила
+
+- после модального — **инфинитив без \`to\`**: «I can **swim**», не «can to swim»;
+- модальный **не меняется** по лицам: «He **can**», не «He cans»;
+- **два модальных подряд нельзя** → берём be able to: «I **will be able to**», не «will can»;
+- для одного КОНКРЕТНОГО успеха в прошлом — \`was able to\` / \`managed to\`, а не \`could\`: «I **was able to** pass the exam» (в тот раз сдал).
+
+> **Главная ошибка русскоговорящих.** (1) Ставить \`to\` после модального: «I can **to** swim» ✗. (2) Добавлять \`-s\`: «She **cans**» ✗. (3) «I **will can**» ✗ → «I will be able to».
+
+## Проверь себя
+
+\`\`\`quiz {}
+She ___ speak three languages fluently.
++ can
+- can to
+- cans
+- is can
+\`\`\`
+
+\`\`\`quiz {}
+I'm busy now, but I ___ help you tomorrow.
++ will be able to
+- will can
+- can to
+- could
+\`\`\`
+
+\`\`\`blank {}
+When I was a child, I ___ swim very well, but I ___ ride a bike.
+= could
+= couldn't | could not
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+manage | /ˈmænɪdʒ/ | справиться, суметь | I managed to fix it myself.
+ability | /əˈbɪləti/ | способность | She has a natural ability for music.
+permission | /pərˈmɪʃn/ | разрешение | You need permission to enter.
+request | /rɪˈkwest/ | просьба, запрос | I have a small request.
+fluently | /ˈfluːəntli/ | бегло, свободно | He speaks French fluently.
+\`\`\`
+`,
+          homework: `
+1. Напиши 3 предложения о том, что ты умеешь и не умеешь делать (can / can't), и 2 — что умел в детстве (could).
+2. Вежливо попроси о трёх вещах, используя Could you…?
+3. Переставь в будущее: «I can help» → «Tomorrow I ___», «She can drive» → «Next year she ___».
+`,
+          cards: [
+            { q: "Какая форма глагола идёт после модального (can, could)?", a: "Инфинитив БЕЗ to: «I can swim», не «can to swim»" },
+            { q: "Почему нельзя «I will can»?", a: "Два модальных подряд нельзя — используем be able to: «I will be able to»" },
+            { q: "could или was able to для конкретного успеха в прошлом?", a: "was able to / managed to (единичный успех); could — общая способность" },
+            { q: "Меняется ли модальный по лицам (he/she/it)?", a: "Нет: «He can», не «He cans» — без -s" }
+          ]
+        },
+        {
+          id: "eng-07",
+          title: "Must, have to, should — обязанность и совет",
+          theory: `
+## Обязанность и необходимость
+
+\`\`\`grammar {"title":"must / have to","formula":"must + V1  ·  have / has to + V1"}
+Сильная обязанность и необходимость.
+* I **must** finish this today. — говорящий сам считает это важным
+* I **have to** wear a uniform. — обязанность извне (правило, приказ)
+* In the past both → **had to**: I **had to** wait (у must прошедшего времени нет).
+\`\`\`
+
+\`\`\`grammar {"title":"should / ought to","formula":"should / ought to + V1"}
+Совет, рекомендация («стоило бы»).
+* You **should** see a doctor. — совет
+* You **shouldn't** eat so late. — совет против
+\`\`\`
+
+## Осторожно: mustn't ≠ don't have to
+
+Это разные вещи, их постоянно путают:
+
+- **mustn't** = **ЗАПРЕЩЕНО**, «нельзя»: You **mustn't** touch this. (нарушение недопустимо)
+- **don't have to** = **не обязательно**, «можно не»: You **don't have to** come. (никто не заставляет, но можно).
+
+## Слова-маркеры и формы
+
+\`must\` и \`should\` — тоже модальные: без \`to\` после них, без \`-s\`, без \`did\`. А \`have to\` — обычный глагол: строит отрицание и вопрос через \`do/does/did\` (\`Do I have to…?\`, \`didn't have to\`).
+
+> **Главная ошибка русскоговорящих.** Переводить «нельзя» как \`don't have to\`. «Тебе нельзя опаздывать» = «You **mustn't** be late», а «You don't have to be late» значит «можешь не опаздывать (но не обязан)».
+
+## Прошедшее / эквиваленты — потренируйся
+
+Впиши форму прошедшего времени (или эквивалент) модального:
+
+\`\`\`table {"cols":["прошедшее / эквивалент"],"rows":["can","must","have to","may"]}
+could
+had to
+had to
+might
+\`\`\`
+
+## Проверь себя
+
+\`\`\`quiz {}
+It's a hospital — you ___ smoke here.
++ mustn't
+- don't have to
+- haven't to
+- must not to
+\`\`\`
+
+\`\`\`quiz {}
+It's Saturday — you ___ get up early. Sleep in!
++ don't have to
+- mustn't
+- shouldn't
+- can't
+\`\`\`
+
+\`\`\`blank {}
+You look exhausted. You ___ take a break. And in the UK you ___ drive on the left.
+= should | ought to
+= have to | must
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+obligation | /ˌɑːblɪˈɡeɪʃn/ | обязанность | I have no obligation to reply.
+forbidden | /fərˈbɪdn/ | запрещённый | Smoking is forbidden here.
+advisable | /ədˈvaɪzəbl/ | целесообразный, разумный | It's advisable to book early.
+deadline | /ˈdedlaɪn/ | крайний срок | The deadline is on Monday.
+strict | /strɪkt/ | строгий | Our teacher is very strict.
+\`\`\`
+`,
+          homework: `
+1. Напиши 3 правила своей работы/учёбы (have to) и 2 личных «надо» (must).
+2. Дай 3 совета другу с should / shouldn't.
+3. Переведи, следя за разницей: «Здесь нельзя фотографировать», «Тебе не обязательно приходить», «Мне пришлось ждать час».
+`,
+          cards: [
+            { q: "must vs have to — в чём разница?", a: "must — обязанность «изнутри» (говорящий сам так считает); have to — обязанность извне (правило, приказ). В прошедшем оба → had to" },
+            { q: "mustn't vs don't have to?", a: "mustn't — запрещено («нельзя»); don't have to — не обязательно («можно не»)" },
+            { q: "Как строятся вопрос/отрицание у have to?", a: "Через do/does/did: Do I have to…?, didn't have to (это обычный глагол, не модальный)" },
+            { q: "Для чего should / ought to?", a: "Совет, рекомендация: «You should rest»; против — shouldn't" }
+          ]
+        },
+        {
+          id: "eng-08",
+          title: "May, might, must, can't — вероятность и вывод",
+          theory: `
+## Про возможность и логический вывод
+
+\`\`\`grammar {"title":"may / might / could","formula":"may / might / could + V1"}
+Возможность, неуверенное предположение — «может быть».
+* It **may** rain later. — вполне возможно
+* She **might** be at home. — не уверен
+* This **could** be the answer. — вариант
+\`\`\`
+
+\`\`\`grammar {"title":"must / can't (логический вывод)","formula":"must + V1  ·  can't + V1"}
+Уверенный вывод по фактам.
+* He isn't answering — he **must** be asleep. — почти уверен, что так
+* That **can't** be John, he's in Japan! — уверен, что НЕ так
+\`\`\`
+
+## Как это работает
+
+- уверен, что ДА (логично так) → **must**;
+- уверен, что НЕТ (невозможно) → **can't** (не \`mustn't\`!);
+- не уверен, просто вариант → **may / might / could**.
+
+Различай на письме: **maybe** (одно слово) = наречие «может быть» в начале фразы; **may be** (два слова) = модальный \`may\` + \`be\`. «**Maybe** she is tired» = «She **may be** tired».
+
+> **Главная ошибка русскоговорящих.** Выражать возможность через \`can\`: «It **can** be true» ✗. Про конкретную ситуацию возможность — это \`may / might / could\`: «It **might** be true». А отрицание уверенного вывода — \`can't\`, не \`mustn't\`: «It **can't** be true» (не может быть).
+
+## Проверь себя
+
+\`\`\`quiz {}
+He isn't picking up the phone. He ___ be busy.
++ must
+- can
+- should
+- may not
+\`\`\`
+
+\`\`\`quiz {}
+That ___ be Anna — she's abroad right now!
++ can't
+- mustn't
+- may not
+- doesn't have to
+\`\`\`
+
+\`\`\`blank {}
+Take an umbrella — it ___ rain later, I'm not sure. But those clouds are dark, so it ___ (уверен) rain soon.
+= may | might | could
+= must
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+certain | /ˈsɜːrtn/ | уверенный, определённый | I'm certain she's right.
+likely | /ˈlaɪkli/ | вероятный | Rain is likely tonight.
+unlikely | /ʌnˈlaɪkli/ | маловероятный | It's unlikely to happen.
+obvious | /ˈɑːbviəs/ | очевидный | The answer is obvious.
+guess | /ɡes/ | догадка; догадываться | Take a guess.
+\`\`\`
+`,
+          homework: `
+1. Напиши 3 предположения о своём соседе/коллеге (may / might / could be…).
+2. Сделай 2 уверенных вывода: один с must, один с can't (по фактам вокруг).
+3. Переведи: «Может быть, он дома», «Это не может быть правдой», «Возможно, она устала».
+`,
+          cards: [
+            { q: "Как выразить неуверенное предположение «может быть»?", a: "may / might / could + V1: «It might rain»" },
+            { q: "must и can't в значении вывода?", a: "must — уверен, что ДА («He must be tired»); can't — уверен, что НЕТ («That can't be true»)" },
+            { q: "maybe или may be?", a: "maybe (одно слово) — наречие; may be (два слова) — модальный may + be. «Maybe she is tired» = «She may be tired»" },
+            { q: "Главная ошибка русскоговорящих про возможность?", a: "Ставить can («It can be true») — про конкретную ситуацию нужно may/might/could; отрицание вывода — can't, не mustn't" }
+          ]
+        }
+      ]
     }
   ]
 });
