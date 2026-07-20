@@ -670,6 +670,229 @@ guess | /ɡes/ | догадка; догадываться | Take a guess.
           ]
         }
       ]
+    },
+    {
+      id: "conditionals",
+      title: "Модуль 3. Условные предложения",
+      lessons: [
+        {
+          id: "eng-09",
+          title: "Нулевой и первый тип (реальные условия)",
+          theory: `
+## Условие, которое реально
+
+\`\`\`grammar {"title":"Zero conditional (нулевой)","formula":"If + Present Simple, … Present Simple"}
+Всегда верные факты, законы природы, инструкции — «если A, то всегда B».
+* If you **heat** ice, it **melts**. — закон природы
+* If I **am** tired, I **go** to bed early. — привычка
+\`\`\`
+
+\`\`\`grammar {"title":"First conditional (первый)","formula":"If + Present Simple, … will + V1"}
+Реальное, вполне возможное условие в будущем.
+* If it **rains**, I **will stay** home. — реальный план на завтра
+* If you **help** me, we **'ll finish** faster.
+\`\`\`
+
+## Главное правило
+
+**В части с \`if\` — НЕ ставим \`will\`.** Будущее показывает только главная часть. Если \`if\`-часть идёт первой, после неё ставится запятая.
+
+Полезно: \`unless\` = «если не» (\`I won't go **unless** you come\` = if you don't come).
+
+> **Главная ошибка русскоговорящих.** Ставить \`will\` в условие: «If it **will** rain…» ✗. Правильно: «**If it rains**, I will stay home». По-русски «если пойдёт дождь» звучит будущим, но в английском в \`if\`-части — настоящее.
+
+## Проверь себя
+
+\`\`\`quiz {}
+If you ___ water to 100°C, it boils.
++ heat
+- will heat
+- heated
+- would heat
+\`\`\`
+
+\`\`\`quiz {}
+If it ___ tomorrow, we'll cancel the picnic.
++ rains
+- will rain
+- rained
+- would rain
+\`\`\`
+
+\`\`\`blank {}
+If you ___ (not / hurry), you ___ (miss) the bus.
+= don't hurry | do not hurry
+= will miss | 'll miss
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+melt | /melt/ | таять, плавиться | Ice melts in the sun.
+boil | /bɔɪl/ | кипеть, кипятить | Water boils at 100°C.
+unless | /ənˈles/ | если не | I won't go unless you come.
+otherwise | /ˈʌðərwaɪz/ | иначе, в противном случае | Hurry, otherwise we'll be late.
+warn | /wɔːrn/ | предупреждать | I warned you about the ice.
+\`\`\`
+`,
+          homework: `
+1. Напиши 3 факта в нулевом типе (If you…, …) и 3 реальных плана на будущее в первом.
+2. Перепиши через unless: «If you don't practise, you won't improve».
+3. Переведи: «Если завтра будет солнце, мы пойдём в парк», «Если нагреть металл, он расширяется».
+`,
+          cards: [
+            { q: "Формула нулевого условного и когда он?", a: "If + Present Simple, … Present Simple — всегда верные факты, законы, привычки" },
+            { q: "Формула первого условного?", a: "If + Present Simple, … will + V1 — реальное возможное будущее" },
+            { q: "Главное правило условных с if?", a: "В if-части НЕ ставим will — будущее показывает только главная часть" },
+            { q: "Что значит unless?", a: "«Если не»: I won't go unless you come = if you don't come" }
+          ]
+        },
+        {
+          id: "eng-10",
+          title: "Второй тип (нереальное настоящее)",
+          theory: `
+## Воображаемая ситуация «если бы»
+
+\`\`\`grammar {"title":"Second conditional (второй)","formula":"If + Past Simple, … would + V1"}
+Нереальное или маловероятное условие в настоящем/будущем — «если бы (сейчас) …, то …».
+* If I **had** more time, I **would learn** Spanish. — но времени нет
+* If I **were** you, I **'d apologize**. — совет
+* If we **won** the lottery, we **would travel**. — маловероятно
+\`\`\`
+
+## Особенности
+
+- прошедшее время в \`if\`-части здесь — не про прошлое, а знак «нереально»;
+- с \`be\` для всех лиц принято **were**: «If I **were** rich», «If he **were** here» (в разговорной речи встречается was, но стандарт — were);
+- в главной части — **would + V1** (сокращённо \`'d\`); \`would\` в \`if\`-часть не ставим.
+
+Оборот **If I were you, …** — стандартный способ дать совет.
+
+> **Главная ошибка русскоговорящих.** «If I **would have** money…» ✗. \`would\` живёт только в главной части: «**If I had** money, I **would** buy it».
+
+## Проверь себя
+
+\`\`\`quiz {}
+If I ___ you, I'd take the job.
++ were
+- am
+- would be
+- will be
+\`\`\`
+
+\`\`\`quiz {}
+If we had a car, we ___ travel more.
++ would
+- will
+- had
+- would have
+\`\`\`
+
+\`\`\`blank {}
+If I ___ (have) more free time, I ___ (learn) to play the guitar.
+= had
+= would learn | 'd learn
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+imagine | /ɪˈmædʒɪn/ | представлять | Imagine you won the lottery.
+afford | /əˈfɔːrd/ | позволить себе | I can't afford a new car.
+apologize | /əˈpɑːlədʒaɪz/ | извиняться | You should apologize to her.
+wealthy | /ˈwelθi/ | богатый, состоятельный | His family is quite wealthy.
+choice | /tʃɔɪs/ | выбор | It's your choice.
+\`\`\`
+`,
+          homework: `
+1. Закончи 5 фраз: «If I had a million dollars, I would…».
+2. Дай 3 совета через «If I were you, …».
+3. Переведи: «Если бы я был на твоём месте, я бы отдохнул», «Если бы у меня была машина, я бы ездил на работу».
+`,
+          cards: [
+            { q: "Формула второго условного и его смысл?", a: "If + Past Simple, … would + V1 — нереальное/маловероятное условие в настоящем или будущем" },
+            { q: "Какую форму be используют во втором условном?", a: "were для всех лиц: «If I were you», «If he were here»" },
+            { q: "Где стоит would, а где нет?", a: "would — только в главной части; в if-части его нет («If I had…, I would…»)" },
+            { q: "Как дать совет условным предложением?", a: "«If I were you, I would…» — стандартный оборот" }
+          ]
+        },
+        {
+          id: "eng-11",
+          title: "Третий тип (нереальное прошлое) и сводка",
+          theory: `
+## Сожаление о прошлом, которое не изменить
+
+\`\`\`grammar {"title":"Third conditional (третий)","formula":"If + Past Perfect, … would have + V3"}
+Нереальное условие в ПРОШЛОМ — «если бы (тогда) …, то (тогда) …», а на самом деле всё было наоборот.
+* If I **had studied**, I **would have passed**. — но не учил → не сдал
+* If she **had left** earlier, she **wouldn't have missed** the train.
+\`\`\`
+
+## Структура и смешанный тип
+
+- \`if\` + **had + V3** (Past Perfect), главная часть — **would have + V3**;
+- сокращения: \`I'd have done\`, \`he'd have come\`.
+
+**Смешанный тип** — прошлое условие → результат в настоящем: «If I **had saved** money, I **would be** rich now» (тогда не откладывал → сейчас не богат).
+
+> **Главная ошибка русскоговорящих.** «If I **would have** known…» ✗. \`would have\` — только в главной части: «**If I had known**, I **would have** told you».
+
+## Сводка: четыре типа
+
+| Тип | Часть с if | Главная часть | Смысл |
+|---|---|---|---|
+| Zero | Present Simple | Present Simple | всегда верно (факт) |
+| First | Present Simple | will + V1 | реальное будущее |
+| Second | Past Simple | would + V1 | нереальное настоящее |
+| Third | Past Perfect | would have + V3 | нереальное прошлое |
+
+## Проверь себя
+
+\`\`\`quiz {}
+If she ___ harder, she would have passed the exam.
++ had studied
+- studied
+- would study
+- has studied
+\`\`\`
+
+\`\`\`quiz {}
+If I had known you were ill, I ___ you.
++ would have visited
+- would visit
+- had visited
+- will visit
+\`\`\`
+
+\`\`\`blank {}
+If we ___ (leave) earlier, we ___ (not / miss) the train.
+= had left
+= wouldn't have missed | would not have missed
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+regret | /rɪˈɡret/ | сожалеть; сожаление | I regret nothing.
+realize | /ˈriːəlaɪz/ | осознавать, понимать | I didn't realize it was late.
+consequence | /ˈkɑːnsɪkwəns/ | последствие | Every choice has consequences.
+avoid | /əˈvɔɪd/ | избегать | We could have avoided the mistake.
+blame | /bleɪm/ | винить; вина | Don't blame yourself.
+\`\`\`
+`,
+          homework: `
+1. Напиши 3 сожаления о прошлом в третьем типе: «If I had…, I would have…».
+2. Придумай 1 предложение смешанного типа (прошлое условие → настоящий результат).
+3. Переведи: «Если бы я знал, я бы пришёл», «Если бы она вышла раньше, она бы не опоздала».
+`,
+          cards: [
+            { q: "Формула третьего условного и его смысл?", a: "If + Past Perfect (had + V3), … would have + V3 — нереальное условие в прошлом (на самом деле было наоборот)" },
+            { q: "Что такое смешанный тип условного?", a: "Прошлое условие → результат в настоящем: «If I had saved money, I would be rich now»" },
+            { q: "Главная ошибка русскоговорящих в третьем типе?", a: "«If I would have known» ✗ — would have только в главной части: «If I had known, I would have…»" },
+            { q: "Четыре типа: if-часть по порядку (Zero/First/Second/Third)?", a: "Present Simple / Present Simple / Past Simple / Past Perfect" }
+          ]
+        }
+      ]
     }
   ]
 });
