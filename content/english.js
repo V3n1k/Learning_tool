@@ -38,6 +38,43 @@ LT_REGISTER({
 1. Пройди бесплатный тест уровня (например, EF SET, 15-минутная версия) и пришли результат.
 2. Напиши 5–7 предложений о себе на английском, не пользуясь переводчиком. Ошибки — это нормально, мне нужно увидеть реальный уровень.
 `
+        },
+        {
+          id: "eng-res",
+          title: "Ресурсы: слушать и читать",
+          theory: `
+Грамматика и слова — это половина дела. Язык «встаёт» от **живого input** — когда регулярно слушаешь и читаешь настоящий английский от носителей. Ниже — проверенные человеческие ресурсы по уровням. Ссылки на видео и статьи удобно складывать во вкладку **«Планирую узнать»** в шапке.
+
+## Слушать (по уровням)
+
+**A2–B1 (начало):**
+- **BBC Learning English** — «6 Minute English» и короткие ролики по грамматике/лексике (британский). YouTube и \`bbc.co.uk/learningenglish\`.
+- **British Council LearnEnglish** — уроки, подкасты, упражнения: \`learnenglish.britishcouncil.org\`.
+
+**B1–B2 (набор беглости):**
+- **English with Lucy** (YouTube) — произношение, грамматика, лексика, чёткий британский.
+- **Rachel's English** (YouTube) — американское произношение «под микроскопом».
+- **Luke's English Podcast** — длинные выпуски живого британского (для B2+).
+
+## Читать (по уровням)
+
+- **Simple English Wikipedia** — \`simple.wikipedia.org\`: статьи простым языком.
+- **News in Levels** — \`newsinlevels.com\`: одни и те же новости в 3 уровнях сложности.
+- **Градуированные ридеры** (адаптированные книги по уровням): Oxford Bookworms, Penguin Readers, Cambridge English Readers.
+
+## Как этим заниматься (важно)
+
+1. **Регулярно** — лучше 10–15 минут каждый день, чем час раз в неделю.
+2. **Не переводи каждое слово** — держи общий смысл; выписывай 5–10 новых слов за подход.
+3. Новые слова → **в Anki** (кнопка «🃏» в уроках лексики уже кладёт карточки в нужном формате).
+4. Видео сначала без субтитров, потом с английскими субтитрами, потом снова без — так тренируется слух.
+5. Выбери **1 канал** и **1 источник для чтения** и держись их пару недель, не прыгай между всеми сразу.
+`,
+          homework: `
+1. Выбери один канал из списка и посмотри одно видео на этой неделе; выпиши 5 новых слов в Anki.
+2. Прочитай одну статью на \`simple.wikipedia.org\` или \`newsinlevels.com\` и перескажи её 3–4 предложениями.
+3. Закинь 2–3 понравившихся видео во вкладку «Планирую узнать», чтобы вернуться к ним.
+`
         }
       ]
     },
@@ -1425,6 +1462,180 @@ I have a ___ in computer science, and my favourite ___ was maths.
             { q: "degree", a: "(учёная) степень; градус" },
             { q: "subject", a: "предмет; тема" },
             { q: "exam", a: "экзамен" }
+          ]
+        },
+        {
+          id: "eng-19",
+          title: "Эмоции и характер",
+          theory: `
+Частотные слова о чувствах и характере (Oxford 3000). Переверни карточки, отправь в Anki кнопкой «🃏», повторяй.
+
+## Слова
+
+\`\`\`flashcards {}
+happy | /ˈhæpi/ | счастливый, довольный | She looks really happy today.
+sad | /sæd/ | грустный | The ending was very sad.
+angry | /ˈæŋɡri/ | злой, сердитый | Don't be angry with me.
+afraid | /əˈfreɪd/ | испуганный, боящийся | I'm afraid of spiders.
+excited | /ɪkˈsaɪtɪd/ | взволнованный (радостно) | The kids are excited about the trip.
+nervous | /ˈnɜːrvəs/ | нервничающий | I'm nervous before exams.
+proud | /praʊd/ | гордый | She's proud of her work.
+shy | /ʃaɪ/ | застенчивый | He's too shy to speak in public.
+kind | /kaɪnd/ | добрый | Thank you, that's very kind.
+honest | /ˈɑːnɪst/ | честный | Be honest with me.
+brave | /breɪv/ | смелый | It was a brave decision.
+lonely | /ˈloʊnli/ | одинокий | She felt lonely in the new city.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+She isn't scared of anything — she's very ___.
++ brave
+- shy
+- honest
+- lonely
+\`\`\`
+
+\`\`\`blank {}
+I have an important exam tomorrow, so I feel really ___.
+= nervous
+\`\`\`
+`,
+          homework: `
+1. Опиши свой характер и настроение сегодня 5–6 предложениями (I'm usually…, Today I feel…).
+2. Отправь карточки в Anki и повтори.
+3. Составь по предложению со словами proud, afraid, kind.
+`,
+          cards: [
+            { q: "happy", a: "счастливый, довольный" },
+            { q: "sad", a: "грустный" },
+            { q: "angry", a: "злой, сердитый" },
+            { q: "afraid", a: "испуганный, боящийся" },
+            { q: "excited", a: "взволнованный (радостно)" },
+            { q: "nervous", a: "нервничающий" },
+            { q: "proud", a: "гордый" },
+            { q: "shy", a: "застенчивый" },
+            { q: "kind", a: "добрый" },
+            { q: "honest", a: "честный" },
+            { q: "brave", a: "смелый" },
+            { q: "lonely", a: "одинокий" }
+          ]
+        },
+        {
+          id: "eng-20",
+          title: "Дом и быт",
+          theory: `
+Ядро лексики о доме и повседневной жизни (Oxford 3000). Переверни карточки, отправь в Anki кнопкой «🃏», повторяй.
+
+## Слова
+
+\`\`\`flashcards {}
+kitchen | /ˈkɪtʃɪn/ | кухня | She's cooking in the kitchen.
+bedroom | /ˈbedruːm/ | спальня | The flat has two bedrooms.
+furniture | /ˈfɜːrnɪtʃər/ | мебель | We bought new furniture.
+floor | /flɔːr/ | пол; этаж | My office is on the third floor.
+wall | /wɔːl/ | стена | There are pictures on the wall.
+window | /ˈwɪndoʊ/ | окно | Open the window, please.
+clean | /kliːn/ | чистый; убирать | I clean the house on Sundays.
+tidy | /ˈtaɪdi/ | опрятный, убранный | Keep your room tidy.
+rent | /rent/ | аренда; снимать | The rent is quite high.
+neighbour | /ˈneɪbər/ | сосед | Our neighbours are very friendly.
+move | /muːv/ | переезжать; двигать | We're moving to a new flat.
+share | /ʃer/ | делить, делиться | I share a flat with a friend.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+The people who live next to you are your ___.
++ neighbours
+- windows
+- floors
+- walls
+\`\`\`
+
+\`\`\`blank {}
+The flat is too small, so we're going to ___ to a bigger one next month.
+= move
+\`\`\`
+`,
+          homework: `
+1. Опиши своё жильё 5–6 предложениями (rooms, furniture, floor…).
+2. Отправь карточки в Anki и повтори.
+3. Составь по предложению со словами rent, neighbour, tidy.
+`,
+          cards: [
+            { q: "kitchen", a: "кухня" },
+            { q: "bedroom", a: "спальня" },
+            { q: "furniture", a: "мебель" },
+            { q: "floor", a: "пол; этаж" },
+            { q: "wall", a: "стена" },
+            { q: "window", a: "окно" },
+            { q: "clean", a: "чистый; убирать" },
+            { q: "tidy", a: "опрятный, убранный" },
+            { q: "rent", a: "аренда; снимать" },
+            { q: "neighbour", a: "сосед" },
+            { q: "move", a: "переезжать; двигать" },
+            { q: "share", a: "делить, делиться" }
+          ]
+        },
+        {
+          id: "eng-21",
+          title: "Здоровье",
+          theory: `
+Частотные слова о здоровье (Oxford 3000). Переверни карточки, отправь в Anki кнопкой «🃏», повторяй.
+
+## Слова
+
+\`\`\`flashcards {}
+health | /helθ/ | здоровье | Smoking is bad for your health.
+healthy | /ˈhelθi/ | здоровый; полезный | Try to eat healthy food.
+ill | /ɪl/ | больной | She's ill and can't come.
+pain | /peɪn/ | боль | I have a pain in my back.
+hurt | /hɜːrt/ | болеть; ранить | My leg hurts.
+headache | /ˈhedeɪk/ | головная боль | I've got a bad headache.
+medicine | /ˈmedɪsn/ | лекарство | Take this medicine twice a day.
+doctor | /ˈdɑːktər/ | врач | You should see a doctor.
+hospital | /ˈhɑːspɪtl/ | больница | He's in hospital now.
+rest | /rest/ | отдых; отдыхать | You need some rest.
+recover | /rɪˈkʌvər/ | выздоравливать | She's recovering well.
+tired | /ˈtaɪərd/ | уставший | I feel really tired today.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+If you feel ill, you should see a ___.
++ doctor
+- neighbour
+- tourist
+- colleague
+\`\`\`
+
+\`\`\`blank {}
+I've got a terrible ___ — I need a painkiller and some rest.
+= headache
+\`\`\`
+`,
+          homework: `
+1. Расскажи, что ты делаешь, чтобы быть здоровым, 5–6 предложениями.
+2. Отправь карточки в Anki и повтори.
+3. Составь по предложению со словами pain, medicine, recover.
+`,
+          cards: [
+            { q: "health", a: "здоровье" },
+            { q: "healthy", a: "здоровый; полезный" },
+            { q: "ill", a: "больной" },
+            { q: "pain", a: "боль" },
+            { q: "hurt", a: "болеть; ранить" },
+            { q: "headache", a: "головная боль" },
+            { q: "medicine", a: "лекарство" },
+            { q: "doctor", a: "врач" },
+            { q: "hospital", a: "больница" },
+            { q: "rest", a: "отдых; отдыхать" },
+            { q: "recover", a: "выздоравливать" },
+            { q: "tired", a: "уставший" }
           ]
         }
       ]
