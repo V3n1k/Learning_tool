@@ -1712,6 +1712,236 @@ I've got a terrible ___ — I need a painkiller and some rest.
           ]
         }
       ]
+    },
+    {
+      id: "ultrakill",
+      title: "Модуль 7. Бонус: лексика ULTRAKILL",
+      lessons: [
+        {
+          id: "eng-ultra",
+          title: "Лор, грехи и реплики ULTRAKILL",
+          theory: `
+Большой бонус-урок для фанатов **ULTRAKILL**. Терминалы, реплики боссов и названия врагов написаны богатым, местами архаично-библейским английским — уровень B2–C1, отличная «взрослая» лексика. Здесь собрано **больше 60 слов**: суть мира, круги Ада, ангелы и вера, глаголы гнева и битвы, слова из реплик, а также названия врагов и механик. Как учить: переворачивай карточки, отправляй в Anki кнопкой «🃏», повторяй интервально — за пару недель закроешь весь набор.
+
+> **MANKIND IS DEAD. BLOOD IS FUEL. HELL IS FULL.**
+> — официальный слоган игры. Человечество вымерло, машины остались, но им нужна кровь как топливо — и они спускаются в Ад, где крови в избытке.
+
+*Примечание: слоган выше — точная цитата. Предложения-примеры к словам описывают лор и механику своими словами, а не выдают себя за дословные реплики персонажей.*
+
+## 1. Суть мира: машины и кровь
+
+\`\`\`flashcards {}
+machine | /məˈʃiːn/ | машина, механизм | V1 is a machine that runs on blood.
+blood | /blʌd/ | кровь | To a machine, blood is fuel.
+fuel | /ˈfjuːəl/ | топливо | The blood of the damned powers the machines.
+mankind | /mænˈkaɪnd/ | человечество | Mankind is dead, but the machines remain.
+hell | /hel/ | ад | Hell is full of tormented souls.
+husk | /hʌsk/ | оболочка, пустая шелуха | Husks are the wandering, mindless dead.
+corpse | /kɔːrps/ | труп, мёртвое тело | The layers are littered with corpses.
+dead | /ded/ | мёртвый; мёртвые | The dead cannot leave their layer of Hell.
+wander | /ˈwɑːndər/ | бродить, скитаться | Lost souls wander the endless halls.
+remain | /rɪˈmeɪn/ | оставаться | Only the machines remain on the surface.
+\`\`\`
+
+## 2. Круги Ада: грехи
+
+\`\`\`flashcards {}
+sin | /sɪn/ | грех | Every layer punishes a different sin.
+sinner | /ˈsɪnər/ | грешник | Each sinner is bound to their crime.
+limbo | /ˈlɪmboʊ/ | лимб, преддверие Ада | Limbo is the first, quiet layer.
+lust | /lʌst/ | похоть | The layer of Lust is a drowned palace.
+gluttony | /ˈɡlʌtəni/ | чревоугодие | The gluttonous are drowned in a rotting swamp.
+greed | /ɡriːd/ | жадность, алчность | Greed fills its halls with gold and marble.
+wrath | /ræθ/ | гнев, ярость | Wrath is a vast, stormy sea of blood.
+heresy | /ˈherəsi/ | ересь | The heretics burn for their false beliefs.
+violence | /ˈvaɪələns/ | насилие | The layer of Violence is a false paradise.
+fraud | /frɔːd/ | обман, мошенничество | Fraud is a city built on lies.
+treachery | /ˈtretʃəri/ | предательство, вероломство | Treachery lies frozen at the bottom of Hell.
+\`\`\`
+
+## 3. Небеса, ангелы и вера
+
+\`\`\`flashcards {}
+angel | /ˈeɪndʒəl/ | ангел | Gabriel is an angel sent to judge the machines.
+apostate | /əˈpɑːsteɪt/ | отступник, вероотступник | Gabriel is later branded an apostate.
+prophet | /ˈprɑːfət/ | пророк | False prophets are punished among the heretics.
+divine | /dɪˈvaɪn/ | божественный | The angels claim a divine right to judge.
+holy | /ˈhoʊli/ | святой, священный | The council speaks in the name of a holy war.
+sacred | /ˈseɪkrɪd/ | священный | Heaven guards its sacred order fiercely.
+heaven | /ˈhevən/ | небеса, рай | Heaven watches Hell from far above.
+worship | /ˈwɜːrʃɪp/ | поклоняться; поклонение | The husks once worshipped gods that abandoned them.
+salvation | /sælˈveɪʃən/ | спасение (души) | There is no salvation left for the damned.
+virtue | /ˈvɜːrtʃuː/ | добродетель | A Virtue is a radiant statue that shields nearby foes.
+redemption | /rɪˈdempʃən/ | искупление | Some seek redemption they will never find.
+\`\`\`
+
+## 4. Глаголы гнева и битвы
+
+\`\`\`flashcards {}
+perish | /ˈperɪʃ/ | погибать, сгинуть | All who oppose Heaven will perish.
+cease | /siːs/ | прекращать(ся) | The bloodshed will not cease.
+smite | /smaɪt/ | поразить, карать | Gabriel was sent to smite the intruder.
+wield | /wiːld/ | владеть (оружием) | V1 can wield a whole arsenal at once.
+slay | /sleɪ/ | сразить, убить | To slay a demon, aim for the weak point.
+vanquish | /ˈvæŋkwɪʃ/ | сокрушить, одолеть | Few can vanquish the King of Hell.
+forsake | /fərˈseɪk/ | покинуть, отречься | The gods forsook their followers long ago.
+repent | /rɪˈpent/ | каяться | The damned have no chance to repent.
+betray | /bɪˈtreɪ/ | предавать | Those who betray are frozen in the final layer.
+spare | /sper/ | щадить, миловать | The machine spares no one in its path.
+flee | /fliː/ | бежать, спасаться бегством | There is nowhere left to flee.
+\`\`\`
+
+## 5. Слова из реплик и характеристики
+
+\`\`\`flashcards {}
+mighty | /ˈmaɪti/ | могучий, могущественный | Gabriel calls himself great and mighty.
+foolish | /ˈfuːlɪʃ/ | глупый, безрассудный | It is foolish to challenge an angel.
+insolent | /ˈɪnsələnt/ | дерзкий, наглый | The insolent machine refuses to kneel.
+wretched | /ˈretʃɪd/ | жалкий, несчастный | The wretched souls beg for an end.
+merciless | /ˈmɜːrsɪləs/ | беспощадный | Hell is a merciless place.
+eternal | /ɪˈtɜːrnəl/ | вечный | The heretics burn in eternal fire.
+mortal | /ˈmɔːrtl/ | смертный | No mortal could survive this place.
+relentless | /rɪˈlentləs/ | неумолимый, неустанный | V1 is relentless in its hunt for blood.
+doom | /duːm/ | рок, гибель; обрекать | A grim doom awaits every layer's ruler.
+vengeance | /ˈvendʒəns/ | месть, возмездие | Sisyphus rises again, driven by vengeance.
+mercy | /ˈmɜːrsi/ | милосердие, пощада | Expect no mercy in the depths of Hell.
+plea | /pliː/ | мольба, просьба | His warning sounds almost like a desperate plea.
+nuisance | /ˈnuːsns/ | досада, помеха, надоеда | To Gabriel, the machine is nothing but a nuisance.
+\`\`\`
+
+## 6. Враги и механики (названия = обычные английские слова)
+
+\`\`\`flashcards {}
+filth | /fɪlθ/ | грязь, мерзость | A Filth is the weakest husk you meet first.
+stray | /streɪ/ | бродячий, заблудший | A Stray lunges and screeches before it strikes.
+stalker | /ˈstɔːkər/ | преследователь | A Stalker releases choking gas as it hunts you.
+sentry | /ˈsentri/ | часовой, страж | A Sentry snipes you from across the arena.
+ferryman | /ˈferimən/ | паромщик | The Ferryman glides across the halls of Greed.
+idol | /ˈaɪdl/ | идол, кумир | An Idol makes a linked enemy invulnerable.
+leviathan | /lɪˈvaɪəθən/ | левиафан, морское чудовище | The Leviathan hunts you through the sea of Wrath.
+parry | /ˈpæri/ | парировать; парирование | A perfect parry sends the attack flying back.
+whiplash | /ˈwɪplæʃ/ | резкий рывок, удар хлыста | The Whiplash yanks you toward distant enemies.
+slam | /slæm/ | с силой ударить, обрушиться | Slam down from the air to crush foes below.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+In the game's slogan, blood is described as ___.
++ fuel
+- a soul
+- a sin
+- a plea
+\`\`\`
+
+\`\`\`quiz {}
+The sin punished by the desire for wealth and gold is ___.
++ greed
+- wrath
+- heresy
+- gluttony
+\`\`\`
+
+\`\`\`quiz {}
+An angel who turns against Heaven is called an ___.
++ apostate
+- idol
+- sinner
+- prophet
+\`\`\`
+
+\`\`\`blank {}
+Mankind is dead. Blood is ___. Hell is full.
+= fuel
+\`\`\`
+
+\`\`\`blank {}
+The heretics burn forever in ___ fire.
+= eternal
+\`\`\`
+
+\`\`\`blank {}
+A perfect ___ sends an enemy's attack flying straight back at them.
+= parry
+\`\`\`
+`,
+          homework: `
+1. Перескажи суть лора ULTRAKILL 6–8 предложениями на английском (machine, blood, fuel, mankind, hell, husk, remain).
+2. Опиши любые три круга Ада и грехи, которые они карают (sin, wrath, greed, heresy, treachery…).
+3. Отправь карточки в Anki (кнопка «🃏») — весь набор на 60+ слов учи по 10–15 в день.
+4. Найди в игре любой терминал или реплику Gabriel, выпиши 3 незнакомых слова и разбери их значение и транскрипцию.
+5. Составь по предложению со словами wrath, apostate, vanquish, relentless, mercy.
+`,
+          cards: [
+            { q: "machine", a: "машина, механизм" },
+            { q: "blood", a: "кровь" },
+            { q: "fuel", a: "топливо" },
+            { q: "mankind", a: "человечество" },
+            { q: "hell", a: "ад" },
+            { q: "husk", a: "оболочка, пустая шелуха" },
+            { q: "corpse", a: "труп, мёртвое тело" },
+            { q: "dead", a: "мёртвый; мёртвые" },
+            { q: "wander", a: "бродить, скитаться" },
+            { q: "remain", a: "оставаться" },
+            { q: "sin", a: "грех" },
+            { q: "sinner", a: "грешник" },
+            { q: "limbo", a: "лимб, преддверие Ада" },
+            { q: "lust", a: "похоть" },
+            { q: "gluttony", a: "чревоугодие" },
+            { q: "greed", a: "жадность, алчность" },
+            { q: "wrath", a: "гнев, ярость" },
+            { q: "heresy", a: "ересь" },
+            { q: "violence", a: "насилие" },
+            { q: "fraud", a: "обман, мошенничество" },
+            { q: "treachery", a: "предательство, вероломство" },
+            { q: "angel", a: "ангел" },
+            { q: "apostate", a: "отступник, вероотступник" },
+            { q: "prophet", a: "пророк" },
+            { q: "divine", a: "божественный" },
+            { q: "holy", a: "святой, священный" },
+            { q: "sacred", a: "священный" },
+            { q: "heaven", a: "небеса, рай" },
+            { q: "worship", a: "поклоняться; поклонение" },
+            { q: "salvation", a: "спасение (души)" },
+            { q: "virtue", a: "добродетель" },
+            { q: "redemption", a: "искупление" },
+            { q: "perish", a: "погибать, сгинуть" },
+            { q: "cease", a: "прекращать(ся)" },
+            { q: "smite", a: "поразить, карать" },
+            { q: "wield", a: "владеть (оружием)" },
+            { q: "slay", a: "сразить, убить" },
+            { q: "vanquish", a: "сокрушить, одолеть" },
+            { q: "forsake", a: "покинуть, отречься" },
+            { q: "repent", a: "каяться" },
+            { q: "betray", a: "предавать" },
+            { q: "spare", a: "щадить, миловать" },
+            { q: "flee", a: "бежать, спасаться бегством" },
+            { q: "mighty", a: "могучий, могущественный" },
+            { q: "foolish", a: "глупый, безрассудный" },
+            { q: "insolent", a: "дерзкий, наглый" },
+            { q: "wretched", a: "жалкий, несчастный" },
+            { q: "merciless", a: "беспощадный" },
+            { q: "eternal", a: "вечный" },
+            { q: "mortal", a: "смертный" },
+            { q: "relentless", a: "неумолимый, неустанный" },
+            { q: "doom", a: "рок, гибель; обрекать" },
+            { q: "vengeance", a: "месть, возмездие" },
+            { q: "mercy", a: "милосердие, пощада" },
+            { q: "plea", a: "мольба, просьба" },
+            { q: "nuisance", a: "досада, помеха, надоеда" },
+            { q: "filth", a: "грязь, мерзость" },
+            { q: "stray", a: "бродячий, заблудший" },
+            { q: "stalker", a: "преследователь" },
+            { q: "sentry", a: "часовой, страж" },
+            { q: "ferryman", a: "паромщик" },
+            { q: "idol", a: "идол, кумир" },
+            { q: "leviathan", a: "левиафан, морское чудовище" },
+            { q: "parry", a: "парировать; парирование" },
+            { q: "whiplash", a: "резкий рывок, удар хлыста" },
+            { q: "slam", a: "с силой ударить, обрушиться" }
+          ]
+        }
+      ]
     }
   ]
 });
