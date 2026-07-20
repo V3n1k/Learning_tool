@@ -49,6 +49,8 @@ LT_REGISTER({
           id: "eng-02",
           title: "Present Simple",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 2, 3, 4.
+
 ## Когда используем
 
 \`\`\`grammar {"title":"Present Simple","formula":"V1  (+ -s / -es для he / she / it)"}
@@ -127,6 +129,8 @@ schedule | /ˈskedʒuːl/ | расписание, график | The schedule ch
           id: "eng-03",
           title: "Present Continuous",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 1, 3, 4.
+
 ## Когда используем
 
 \`\`\`grammar {"title":"Present Continuous","formula":"am / is / are + V-ing"}
@@ -199,6 +203,8 @@ progress | /ˈprɑːɡres/ | прогресс, продвижение | We're ma
           id: "eng-04",
           title: "Past Simple",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 5 (+ 12–14: Present perfect vs Past).
+
 ## Когда используем
 
 \`\`\`grammar {"title":"Past Simple","formula":"V2  (правильные: +ed)"}
@@ -278,6 +284,8 @@ decade | /ˈdekeɪd/ | десятилетие | A lot changed in the last decade
           id: "eng-01",
           title: "Present Perfect",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 7, 8, 12–14.
+
 ## Когда используем
 
 \`\`\`grammar {"title":"Present Perfect","formula":"have / has + V3"}
@@ -356,6 +364,8 @@ yet | /jet/ | ещё (в вопросах и отрицаниях) | Have you fi
           id: "eng-05",
           title: "Future: will и be going to",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 20, 21, 22, 23.
+
 ## Два способа говорить о будущем
 
 \`\`\`grammar {"title":"will + V1","formula":"will + V1"}
@@ -435,6 +445,8 @@ probably | /ˈprɑːbəbli/ | вероятно, наверное | I'll probably
           id: "eng-06",
           title: "Can, could, be able to",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 26, 27.
+
 ## Способность, разрешение, просьба
 
 \`\`\`grammar {"title":"can / could","formula":"can / could + V1 (без to)"}
@@ -509,6 +521,8 @@ fluently | /ˈfluːəntli/ | бегло, свободно | He speaks French flu
           id: "eng-07",
           title: "Must, have to, should — обязанность и совет",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 31, 32, 33, 34.
+
 ## Обязанность и необходимость
 
 \`\`\`grammar {"title":"must / have to","formula":"must + V1  ·  have / has to + V1"}
@@ -598,6 +612,8 @@ strict | /strɪkt/ | строгий | Our teacher is very strict.
           id: "eng-08",
           title: "May, might, must, can't — вероятность и вывод",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 28, 29, 30.
+
 ## Про возможность и логический вывод
 
 \`\`\`grammar {"title":"may / might / could","formula":"may / might / could + V1"}
@@ -679,6 +695,8 @@ guess | /ɡes/ | догадка; догадываться | Take a guess.
           id: "eng-09",
           title: "Нулевой и первый тип (реальные условия)",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 38 (+ 25: when/if).
+
 ## Условие, которое реально
 
 \`\`\`grammar {"title":"Zero conditional (нулевой)","formula":"If + Present Simple, … Present Simple"}
@@ -751,6 +769,8 @@ warn | /wɔːrn/ | предупреждать | I warned you about the ice.
           id: "eng-10",
           title: "Второй тип (нереальное настоящее)",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 39 (+ 41: wish).
+
 ## Воображаемая ситуация «если бы»
 
 \`\`\`grammar {"title":"Second conditional (второй)","formula":"If + Past Simple, … would + V1"}
@@ -820,6 +840,8 @@ choice | /tʃɔɪs/ | выбор | It's your choice.
           id: "eng-11",
           title: "Третий тип (нереальное прошлое) и сводка",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 40.
+
 ## Сожаление о прошлом, которое не изменить
 
 \`\`\`grammar {"title":"Third conditional (третий)","formula":"If + Past Perfect, … would have + V3"}
@@ -902,6 +924,8 @@ blame | /bleɪm/ | винить; вина | Don't blame yourself.
           id: "eng-12",
           title: "Пассив: образование и базовые времена",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 42.
+
 ## Что такое пассив
 
 \`\`\`grammar {"title":"Passive voice","formula":"be + V3 (третья форма)"}
@@ -989,6 +1013,8 @@ discover | /dɪˈskʌvər/ | открывать, обнаруживать | Amer
           id: "eng-13",
           title: "Пассив во всех временах и с модальными",
           theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 43, 44.
+
 ## Меняется только глагол be
 
 Схема пассива одна — \`be + V3\`, — а время/модальность задаёт форма \`be\`:
