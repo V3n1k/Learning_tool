@@ -1093,8 +1093,164 @@ examine | /ɪɡˈzæmɪn/ | осматривать, проверять | The pat
       ]
     },
     {
+      id: "reported",
+      title: "Модуль 5. Косвенная речь",
+      lessons: [
+        {
+          id: "eng-17",
+          title: "Косвенная речь: утверждения",
+          theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 47, 48.
+
+## Прямая и косвенная речь
+
+\`\`\`grammar {"title":"Reported speech","formula":"say/tell + (that) + сдвиг времени назад"}
+Пересказываем чужие слова. Главный глагол (\`said\`/\`told\`) в прошедшем — и остальное «сдвигается» на шаг в прошлое.
+* Прямая: Paul said, **"I am feeling ill."**
+* Косвенная: Paul said (that) he **was feeling** ill.
+\`\`\`
+
+## Сдвиг времён (backshift)
+
+Настоящее в прямой речи → прошедшее в косвенной:
+
+\`\`\`
+am / is  → was        will      → would
+are      → were       can       → could
+do/does  → did        want/like → wanted/liked
+have/has → had        go/know   → went/knew
+\`\`\`
+
+Слово **that** можно опустить: «He said he was tired» = «He said **that** he was tired». Меняются и местоимения/обстоятельства: \`I → he/she\`, \`tomorrow → the next day\`, \`here → there\`.
+
+## say или tell
+
+- **tell** — всегда с адресатом: \`He **told me** that…\` (не «told that…»);
+- **say** — без адресата: \`He **said** that…\` (не «said me»); можно \`say something **to** somebody\`.
+
+> **Главная ошибка русскоговорящих.** (1) Не делать сдвиг: «He said he **is** tired» — обычно нужно «**was** tired». (2) Путать say/tell: не «He **said me**», а «He **told me**» / «He **said**».
+
+## Сдвиг времён — потренируйся
+
+Впиши форму, которую примет глагол в косвенной речи:
+
+\`\`\`table {"cols":["в косвенной речи"],"rows":["am / is","are","do / does","have / has","will","can"]}
+was
+were
+did
+had
+would
+could
+\`\`\`
+
+## Проверь себя
+
+\`\`\`quiz {}
+Direct: "I am really tired." → She said that she ___ really tired.
++ was
+- is
+- were
+- am
+\`\`\`
+
+\`\`\`blank {}
+He said, "I will call you" → He said he ___ call me. And she ___ me that she was busy.
+= would
+= told
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+mention | /ˈmenʃn/ | упоминать | He mentioned it briefly.
+admit | /ədˈmɪt/ | признавать | She admitted her mistake.
+deny | /dɪˈnaɪ/ | отрицать | He denied everything.
+explain | /ɪkˈspleɪn/ | объяснять | Let me explain the rule.
+reply | /rɪˈplaɪ/ | отвечать | She didn't reply to my message.
+\`\`\`
+`,
+          homework: `
+1. Перескажи 5 фраз друга в косвенной речи (со сдвигом времён и заменой местоимений).
+2. Выбери say или tell: «She ___ me the news», «He ___ that he was late», «What did you ___?».
+3. Переведи: «Он сказал, что устал», «Она сказала мне, что придёт завтра».
+`,
+          cards: [
+            { q: "Что происходит с временем при переходе в косвенную речь?", a: "Сдвиг назад: am/is→was, are→were, do→did, have→had, will→would, can→could, present→past" },
+            { q: "say или tell — в чём разница?", a: "tell + адресат (told me); say без адресата (said that…), или say something to somebody" },
+            { q: "Можно ли опустить that в косвенной речи?", a: "Да: «He said he was tired» = «He said that he was tired»" },
+            { q: "Что ещё меняется, кроме времени?", a: "Местоимения (I→he/she) и обстоятельства (tomorrow→the next day, here→there)" }
+          ]
+        },
+        {
+          id: "eng-18",
+          title: "Косвенная речь: просьбы и приказы",
+          theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Unit 48.
+
+## Команды и просьбы
+
+\`\`\`grammar {"title":"tell / ask somebody to do","formula":"tell / ask + кого + (not) to + V1"}
+Приказы и просьбы передаются не через that, а через инфинитив с to.
+* "Drink water." → The doctor **told me to drink** water.
+* "Can you help me?" → She **asked me to help** her.
+* "Don't be late." → He **told me not to be** late.
+\`\`\`
+
+## Как строить
+
+- приказ, указание → **tell somebody to** + V1;
+- просьба → **ask somebody to** + V1;
+- отрицание → **not to** + V1 (частица \`not\` перед \`to\`).
+
+## Когда сдвиг НЕ обязателен
+
+Если сказанное **всё ещё верно**, время можно не сдвигать: «Paul said his new job **is** boring» (работа скучна и сейчас) — или «**was** boring», оба варианта допустимы. Но если ситуация уже изменилась/закончилась — нужно прошедшее.
+
+> **Главная ошибка русскоговорящих.** Передавать команду через that («He said that I must…») — естественнее \`tell/ask somebody **to** do\`. И забывать порядок в отрицании: \`told me **not to** go\`, а не «told me to not go».
+
+## Проверь себя
+
+\`\`\`quiz {}
+"Sit down," she said. → She told me ___.
++ to sit down
+- sit down
+- that sit down
+- sitting down
+\`\`\`
+
+\`\`\`blank {}
+"Open the door," she said → She told me ___ the door. "Please don't be late" → He asked me ___ late.
+= to open
+= not to be
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+order | /ˈɔːrdər/ | приказывать; заказ | The officer ordered them to stop.
+remind | /rɪˈmaɪnd/ | напоминать | Remind me to call her.
+beg | /beɡ/ | умолять | She begged him to stay.
+insist | /ɪnˈsɪst/ | настаивать | He insisted on paying.
+advise | /ədˈvaɪz/ | советовать | The doctor advised me to rest.
+\`\`\`
+`,
+          homework: `
+1. Передай 5 команд/просьб в косвенной речи (tell/ask somebody to do), из них 2 отрицательные (not to).
+2. Преврати в косвенную речь: «Help me», «Don't touch it», «Please wait here».
+3. Переведи: «Он велел мне подождать», «Она попросила меня не опаздывать».
+`,
+          cards: [
+            { q: "Как передаётся приказ/просьба в косвенной речи?", a: "tell/ask somebody to + V1 (не через that): He told me to wait; She asked me to help" },
+            { q: "Как строится отрицательная команда в косвенной речи?", a: "not to + V1: He told me not to be late (частица not перед to)" },
+            { q: "tell или ask для команды и для просьбы?", a: "tell somebody to… — приказ/указание; ask somebody to… — просьба" },
+            { q: "Когда сдвиг времени в косвенной речи НЕ обязателен?", a: "Когда сказанное всё ещё верно: «He said his job is/was boring» — оба варианта" }
+          ]
+        }
+      ]
+    },
+    {
       id: "vocab",
-      title: "Модуль 5. Лексика (Oxford 3000)",
+      title: "Модуль 6. Лексика (Oxford 3000)",
       lessons: [
         {
           id: "eng-14",
