@@ -146,7 +146,7 @@ My sister ___ (study) medicine, and she ___ (not / like) exams.
 usually | /ˈjuːʒuəli/ | обычно | I usually get up at seven.
 commute | /kəˈmjuːt/ | ездить на работу | I commute by train every day.
 routine | /ruːˈtiːn/ | распорядок, рутина | Morning routine keeps me focused.
-rarely | /ˈreərli/ | редко | She rarely eats fast food.
+rarely | /ˈrerli/ | редко | She rarely eats fast food.
 schedule | /ˈskedʒuːl/ | расписание, график | The schedule changes on Fridays.
 \`\`\`
 `,
@@ -202,7 +202,7 @@ Look! It ___ outside.
 \`\`\`
 
 \`\`\`quiz {}
-I ___ this song — it's my favourite. (глагол состояния!)
+I ___ this song — it's my favorite. (глагол состояния!)
 + love
 - am loving
 - loves
@@ -219,7 +219,7 @@ Be quiet, please — the baby ___ (sleep) right now.
 \`\`\`flashcards {}
 currently | /ˈkʌrəntli/ | в данный момент | I'm currently learning Go.
 at the moment | /ət ðə ˈmoʊmənt/ | сейчас, в данный момент | She's busy at the moment.
-temporary | /ˈtempərəri/ | временный | It's a temporary solution.
+temporary | /ˈtempəreri/ | временный | It's a temporary solution.
 stative verb | /ˈsteɪtɪv vɜːrb/ | глагол состояния | Stative verbs avoid the -ing form.
 progress | /ˈprɑːɡres/ | прогресс, продвижение | We're making good progress.
 \`\`\`
@@ -379,7 +379,7 @@ She ___ (live) in London for five years.
 \`\`\`flashcards {}
 achieve | /əˈtʃiːv/ | достигать | She worked hard to achieve her goals.
 crucial | /ˈkruːʃəl/ | решающий, важный | Practice is crucial for fluency.
-overwhelmed | /ˌoʊvərˈwɛlmd/ | подавленный | I felt overwhelmed by new words.
+overwhelmed | /ˌoʊvərˈwelmd/ | подавленный | I felt overwhelmed by new words.
 already | /ɔːlˈredi/ | уже | I have already seen this film.
 yet | /jet/ | ещё (в вопросах и отрицаниях) | Have you finished yet?
 \`\`\`
@@ -1282,6 +1282,79 @@ advise | /ədˈvaɪz/ | советовать | The doctor advised me to rest.
             { q: "tell или ask для команды и для просьбы?", a: "tell somebody to… — приказ/указание; ask somebody to… — просьба" },
             { q: "Когда сдвиг времени в косвенной речи НЕ обязателен?", a: "Когда сказанное всё ещё верно: «He said his job is/was boring» — оба варианта" }
           ]
+        },
+        {
+          id: "eng-22",
+          title: "Косвенная речь: вопросы",
+          theory: `
+> 📖 **Murphy** «English Grammar in Use» (5-е изд.): Units 49, 50.
+
+## Косвенный вопрос
+
+\`\`\`grammar {"title":"ask + вопрос-словом + порядок как в утверждении","formula":"ask (+ if/whether) + порядок слов утверждения + сдвиг времени"}
+При пересказе вопроса пропадает инверсия и вспомогательный do/does/did, а время сдвигается назад.
+* "Where **are you** going?" → She asked where **I was** going.
+* "What time **does** the film **start**?" → He asked what time the film **started**.
+* "**Do** you like it?" → She asked **if** I liked it.
+\`\`\`
+
+## Три правила
+
+1. **Порядок слов — как в утверждении** (подлежащее перед сказуемым): не «asked where **was I**», а «asked where **I was**».
+2. **Без do/does/did**: не «asked what **do** I **do**», а «asked what **I did**».
+3. **Yes/no-вопрос** (без вопросительного слова) → через **if** или **whether**: "Are you tired?" → asked **if** I was tired.
+
+Плюс обычный **сдвиг времён** (как в утверждениях): are→were, do→did, can→could…
+
+Тот же порядок «как в утверждении» — и в вежливых оборотах: «**Do you know** where the station **is**?» (не «where is the station»).
+
+> **Главная ошибка русскоговорящих.** Сохранять «вопросительный» порядок и do/does/did: «She asked where **was I**» ✗, «He asked what **do I do**» ✗. Правильно — «where **I was**», «what **I did**».
+
+## Проверь себя
+
+\`\`\`quiz {}
+Direct: "Where do you live?" → She asked me where I ___.
++ lived
+- do live
+- did live
+- live
+\`\`\`
+
+\`\`\`quiz {}
+Direct: "Do you like it?" → He asked ___ I liked it.
++ if
+- that
+- do
+- what
+\`\`\`
+
+\`\`\`blank {}
+"Where are you going?" → She asked me where I ___ going. "Are you tired?" → She asked ___ I was tired.
+= was
+= if | whether
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+wonder | /ˈwʌndər/ | задаваться вопросом | I wonder where she is.
+curious | /ˈkjʊriəs/ | любопытный | I'm curious about the results.
+whether | /ˈweðər/ | ли (в косвенном вопросе) | I'm not sure whether to go.
+confused | /kənˈfjuːzd/ | сбитый с толку | I'm confused by this rule.
+doubt | /daʊt/ | сомнение; сомневаться | I doubt he will come.
+\`\`\`
+`,
+          homework: `
+1. Переведи 5 прямых вопросов в косвенные (She asked… / He wanted to know…), из них 2 — yes/no через if/whether.
+2. Исправь: «She asked where was I», «He asked what do I want».
+3. Переведи: «Она спросила, где я живу», «Он спросил, устал ли я».
+`,
+          cards: [
+            { q: "Что происходит с порядком слов в косвенном вопросе?", a: "Становится как в утверждении (подлежащее перед сказуемым): «asked where I was», не «where was I»" },
+            { q: "Что делать с do/does/did в косвенном вопросе?", a: "Убрать: «asked what I did», не «what did I do»" },
+            { q: "Как передать yes/no-вопрос в косвенной речи?", a: "Через if или whether: «Are you tired?» → «asked if/whether I was tired»" },
+            { q: "Меняется ли время в косвенном вопросе?", a: "Да, обычный сдвиг: are→were, do→did, can→could и т.д." }
+          ]
         }
       ]
     },
@@ -1424,7 +1497,7 @@ boss | /bɔːs/ | начальник | My boss is very strict.
 skill | /skɪl/ | навык | Communication is a key skill.
 hire | /ˈhaɪər/ | нанимать | They hired ten new people.
 degree | /dɪˈɡriː/ | (учёная) степень; градус | She has a degree in biology.
-subject | /ˈsʌbdʒɪkt/ | предмет; тема | Maths is my favourite subject.
+subject | /ˈsʌbdʒɪkt/ | предмет; тема | Math is my favorite subject.
 exam | /ɪɡˈzæm/ | экзамен | I passed the exam easily.
 \`\`\`
 
@@ -1439,7 +1512,7 @@ The amount of money you earn each month is your ___.
 \`\`\`
 
 \`\`\`blank {}
-I have a ___ in computer science, and my favourite ___ was maths.
+I have a ___ in computer science, and my favorite ___ was maths.
 = degree
 = subject
 \`\`\`
@@ -1540,7 +1613,7 @@ window | /ˈwɪndoʊ/ | окно | Open the window, please.
 clean | /kliːn/ | чистый; убирать | I clean the house on Sundays.
 tidy | /ˈtaɪdi/ | опрятный, убранный | Keep your room tidy.
 rent | /rent/ | аренда; снимать | The rent is quite high.
-neighbour | /ˈneɪbər/ | сосед | Our neighbours are very friendly.
+neighbor | /ˈneɪbər/ | сосед | Our neighbors are very friendly.
 move | /muːv/ | переезжать; двигать | We're moving to a new flat.
 share | /ʃer/ | делить, делиться | I share a flat with a friend.
 \`\`\`
@@ -1549,7 +1622,7 @@ share | /ʃer/ | делить, делиться | I share a flat with a friend.
 
 \`\`\`quiz {}
 The people who live next to you are your ___.
-+ neighbours
++ neighbors
 - windows
 - floors
 - walls
@@ -1563,7 +1636,7 @@ The flat is too small, so we're going to ___ to a bigger one next month.
           homework: `
 1. Опиши своё жильё 5–6 предложениями (rooms, furniture, floor…).
 2. Отправь карточки в Anki и повтори.
-3. Составь по предложению со словами rent, neighbour, tidy.
+3. Составь по предложению со словами rent, neighbor, tidy.
 `,
           cards: [
             { q: "kitchen", a: "кухня" },
@@ -1575,7 +1648,7 @@ The flat is too small, so we're going to ___ to a bigger one next month.
             { q: "clean", a: "чистый; убирать" },
             { q: "tidy", a: "опрятный, убранный" },
             { q: "rent", a: "аренда; снимать" },
-            { q: "neighbour", a: "сосед" },
+            { q: "neighbor", a: "сосед" },
             { q: "move", a: "переезжать; двигать" },
             { q: "share", a: "делить, делиться" }
           ]
@@ -1608,7 +1681,7 @@ tired | /ˈtaɪərd/ | уставший | I feel really tired today.
 \`\`\`quiz {}
 If you feel ill, you should see a ___.
 + doctor
-- neighbour
+- neighbor
 - tourist
 - colleague
 \`\`\`
