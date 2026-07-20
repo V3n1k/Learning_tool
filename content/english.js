@@ -893,6 +893,178 @@ blame | /bleɪm/ | винить; вина | Don't blame yourself.
           ]
         }
       ]
+    },
+    {
+      id: "passive",
+      title: "Модуль 4. Пассивный залог",
+      lessons: [
+        {
+          id: "eng-12",
+          title: "Пассив: образование и базовые времена",
+          theory: `
+## Что такое пассив
+
+\`\`\`grammar {"title":"Passive voice","formula":"be + V3 (третья форма)"}
+Когда важно, ЧТО происходит с объектом, а не кто это делает. Объект действия становится подлежащим.
+* Coffee **is grown** in Brazil. — не важно, кто выращивает
+* The window **was broken**. — важен факт, а не виновник
+\`\`\`
+
+## Из активного в пассивный
+
+Дополнение активного предложения становится подлежащим пассивного, а глагол превращается в \`be + V3\`:
+
+\`\`\`
+Активный:  Shakespeare wrote Hamlet.
+Пассивный: Hamlet was written (by Shakespeare).
+\`\`\`
+
+Того, кто выполняет действие, добавляют через **by** — но только если это важно. Чаще его вообще опускают (неизвестно / неважно / очевидно).
+
+**Время несёт глагол \`be\`:**
+- Present Simple: \`am / is / are\` + V3 — «Cars **are made** here»;
+- Past Simple: \`was / were\` + V3 — «It **was made** in Japan».
+
+> **Главная ошибка русскоговорящих.** (1) Забыть \`be\`: «English **spoken** here» ✗ → «English **is** spoken here». (2) Взять вторую форму вместо третьей: «was **wrote**» ✗ → «was **written**».
+
+## Третьи формы — потренируйся
+
+Впиши V3 (Participle) — именно её берёт пассив:
+
+\`\`\`table {"cols":["V3 (Participle)"],"rows":["build","make","take","give","write"]}
+built
+made
+taken
+given
+written
+\`\`\`
+
+## Проверь себя
+
+\`\`\`quiz {}
+This bridge ___ in 1990.
++ was built
+- was build
+- built
+- is build
+\`\`\`
+
+\`\`\`quiz {}
+This car ___ in Japan.
++ is made
+- makes
+- is make
+- made
+\`\`\`
+
+\`\`\`blank {}
+The letters ___ (send) yesterday, and English ___ (speak) all over the world.
+= were sent
+= is spoken
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+grow | /ɡroʊ/ | выращивать; расти | Rice is grown in Asia.
+invent | /ɪnˈvent/ | изобретать | The telephone was invented long ago.
+destroy | /dɪˈstrɔɪ/ | разрушать | The building was destroyed by fire.
+produce | /prəˈduːs/ | производить | Cars are produced in this factory.
+discover | /dɪˈskʌvər/ | открывать, обнаруживать | America was discovered in 1492.
+\`\`\`
+`,
+          homework: `
+1. Переделай в пассив: «People speak English here», «Someone stole my bike», «They built this house in 1970».
+2. Напиши 3 факта о своей стране в пассиве (что производят, выращивают, где что сделано).
+3. Переведи: «Этот текст был написан вчера», «Здесь продают книги», «Дом был построен в прошлом году».
+`,
+          cards: [
+            { q: "Как образуется пассив?", a: "be + V3 (третья форма глагола); время несёт глагол be" },
+            { q: "Когда используют пассив?", a: "Когда важно, что происходит с объектом, а деятель неизвестен/неважен/очевиден" },
+            { q: "Как добавить деятеля в пассиве?", a: "Через by (by Shakespeare) — только если это важно; чаще опускают" },
+            { q: "Пассив в Present и Past Simple?", a: "am/is/are + V3 (Cars are made); was/were + V3 (It was made)" }
+          ]
+        },
+        {
+          id: "eng-13",
+          title: "Пассив во всех временах и с модальными",
+          theory: `
+## Меняется только глагол be
+
+Схема пассива одна — \`be + V3\`, — а время/модальность задаёт форма \`be\`:
+
+\`\`\`grammar {"title":"Пассив в разных временах","formula":"[нужная форма be] + V3"}
+* Present Continuous: The road **is being repaired**. — прямо сейчас
+* Present Perfect: The car **has been sold**. — уже, с результатом
+* Future: It **will be finished** tomorrow.
+* Modal: It **must be done** now. (can/should/must + be + V3)
+\`\`\`
+
+## Сводка по временам
+
+| Время | Пассив (be + V3) | Пример |
+|---|---|---|
+| Present Simple | am / is / are + V3 | Cars **are made** here. |
+| Past Simple | was / were + V3 | It **was made** in Japan. |
+| Present Continuous | is / are being + V3 | The road **is being repaired**. |
+| Present Perfect | has / have been + V3 | The car **has been sold**. |
+| Future | will be + V3 | It **will be done** soon. |
+| Modal | модальный + be + V3 | It **must be done** now. |
+
+## by или with
+
+- **by** — кто/что выполняет действие (деятель): painted **by** an artist;
+- **with** — чем, инструмент: cut **with** a knife.
+
+> **Главная ошибка русскоговорящих.** Путать активный Perfect и пассивный: «has built» (он построил) vs «**has been built**» (было построено). И ставить \`with\` вместо \`by\` для деятеля: «written **by** the author», не «with».
+
+## Проверь себя
+
+\`\`\`quiz {}
+Sorry, you can't use the road — it ___ at the moment.
++ is being repaired
+- is repaired
+- repairs
+- has repaired
+\`\`\`
+
+\`\`\`quiz {}
+Don't worry, the report ___ by tomorrow.
++ will be finished
+- will finish
+- is finished
+- finishes
+\`\`\`
+
+\`\`\`blank {}
+The house ___ (already / sell), and the broken window ___ (must / repair) now.
+= has already been sold
+= must be repaired
+\`\`\`
+
+## Слова урока
+
+\`\`\`flashcards {}
+repair | /rɪˈper/ | чинить, ремонтировать | The road is being repaired.
+deliver | /dɪˈlɪvər/ | доставлять | Parcels are delivered daily.
+damage | /ˈdæmɪdʒ/ | повреждать; ущерб | The car was badly damaged.
+replace | /rɪˈpleɪs/ | заменять | The old part will be replaced.
+examine | /ɪɡˈzæmɪn/ | осматривать, проверять | The patient was examined by a doctor.
+\`\`\`
+`,
+          homework: `
+1. Поставь в пассив в нужном времени: «They are building a bridge» (сейчас), «Someone has eaten my sandwich», «They will send the parcel tomorrow».
+2. Составь 2 предложения с модальным пассивом (must be done / can be seen).
+3. Переведи: «Дорогу сейчас ремонтируют», «Машину уже продали», «Это должно быть сделано сегодня».
+`,
+          cards: [
+            { q: "Как строится пассив в разных временах?", a: "Схема одна — be + V3, — меняется только форма be (is being, has been, will be, must be…)" },
+            { q: "Пассив в Present Continuous и Present Perfect?", a: "is/are being + V3 (is being repaired); has/have been + V3 (has been sold)" },
+            { q: "Пассив с модальными?", a: "модальный + be + V3: It must be done, It can be seen" },
+            { q: "by или with в пассиве?", a: "by — деятель (by an artist); with — инструмент (with a knife)" }
+          ]
+        }
+      ]
     }
   ]
 });
