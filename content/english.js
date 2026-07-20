@@ -1065,6 +1065,187 @@ examine | /ɪɡˈzæmɪn/ | осматривать, проверять | The pat
           ]
         }
       ]
+    },
+    {
+      id: "vocab",
+      title: "Модуль 5. Лексика (Oxford 3000)",
+      lessons: [
+        {
+          id: "eng-14",
+          title: "Еда и напитки",
+          theory: `
+Частотные слова темы «еда» — из ядра Oxford 3000 (самые нужные ~3000 слов языка). Как учить: сначала переверни все карточки ниже, потом кнопкой «🃏» отправь их в Anki и повторяй интервально — так они реально закрепятся.
+
+## Слова
+
+\`\`\`flashcards {}
+meal | /miːl/ | приём пищи, еда | We had a big meal together.
+breakfast | /ˈbrekfəst/ | завтрак | I sometimes skip breakfast.
+meat | /miːt/ | мясо | She doesn't eat meat.
+vegetable | /ˈvedʒtəbl/ | овощ | Eat more vegetables.
+fruit | /fruːt/ | фрукты | Fruit is good for you.
+bread | /bred/ | хлеб | I bought some fresh bread.
+egg | /eɡ/ | яйцо | I had two eggs for breakfast.
+cheese | /tʃiːz/ | сыр | This cheese smells strong.
+drink | /drɪŋk/ | напиток; пить | Would you like a drink?
+sugar | /ˈʃʊɡər/ | сахар | No sugar in my tea, please.
+hungry | /ˈhʌŋɡri/ | голодный | I'm really hungry.
+taste | /teɪst/ | вкус; пробовать | This soup tastes great.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+Water, juice and coffee are all ___.
++ drinks
+- meals
+- vegetables
+- bread
+\`\`\`
+
+\`\`\`blank {}
+I haven't eaten all day — I'm so ___.
+= hungry
+\`\`\`
+`,
+          homework: `
+1. Опиши свой обычный завтрак и обед 5–6 предложениями, используя слова темы.
+2. Отправь карточки в Anki (кнопка «🃏») и повтори их вечером.
+3. Составь 3 предложения со словами taste, hungry, meal.
+`,
+          cards: [
+            { q: "meal", a: "приём пищи, еда" },
+            { q: "breakfast", a: "завтрак" },
+            { q: "meat", a: "мясо" },
+            { q: "vegetable", a: "овощ" },
+            { q: "fruit", a: "фрукты" },
+            { q: "bread", a: "хлеб" },
+            { q: "egg", a: "яйцо" },
+            { q: "cheese", a: "сыр" },
+            { q: "drink", a: "напиток; пить" },
+            { q: "sugar", a: "сахар" },
+            { q: "hungry", a: "голодный" },
+            { q: "taste", a: "вкус; пробовать" }
+          ]
+        },
+        {
+          id: "eng-15",
+          title: "Путешествия",
+          theory: `
+Ядро лексики о поездках (Oxford 3000). Переверни карточки, отправь в Anki кнопкой «🃏», повторяй.
+
+## Слова
+
+\`\`\`flashcards {}
+trip | /trɪp/ | поездка | We took a trip to the sea.
+flight | /flaɪt/ | рейс, полёт | Our flight was delayed.
+airport | /ˈerpɔːrt/ | аэропорт | Meet me at the airport.
+ticket | /ˈtɪkɪt/ | билет | I booked a ticket online.
+luggage | /ˈlʌɡɪdʒ/ | багаж | My luggage is very heavy.
+passport | /ˈpæspɔːrt/ | паспорт | Don't forget your passport.
+hotel | /hoʊˈtel/ | отель, гостиница | We stayed at a small hotel.
+abroad | /əˈbrɔːd/ | за границей, за границу | She works abroad.
+map | /mæp/ | карта | Let's check the map.
+tourist | /ˈtʊrɪst/ | турист | The city is full of tourists.
+arrive | /əˈraɪv/ | прибывать | We arrived late at night.
+book | /bʊk/ | бронировать; книга | I'll book a room for two nights.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+At the border they always check your ___.
++ passport
+- luggage
+- hotel
+- map
+\`\`\`
+
+\`\`\`blank {}
+Our ___ was delayed by two hours at the airport.
+= flight
+\`\`\`
+`,
+          homework: `
+1. Расскажи о своей последней поездке 5–6 предложениями (trip, flight, hotel…).
+2. Отправь карточки в Anki и повтори.
+3. Составь диалог в аэропорту на 4 реплики со словами ticket, passport, luggage.
+`,
+          cards: [
+            { q: "trip", a: "поездка" },
+            { q: "flight", a: "рейс, полёт" },
+            { q: "airport", a: "аэропорт" },
+            { q: "ticket", a: "билет" },
+            { q: "luggage", a: "багаж" },
+            { q: "passport", a: "паспорт" },
+            { q: "hotel", a: "отель, гостиница" },
+            { q: "abroad", a: "за границей, за границу" },
+            { q: "map", a: "карта" },
+            { q: "tourist", a: "турист" },
+            { q: "arrive", a: "прибывать" },
+            { q: "book", a: "бронировать; книга" }
+          ]
+        },
+        {
+          id: "eng-16",
+          title: "Работа и учёба",
+          theory: `
+Частотные слова о работе и учёбе (Oxford 3000). Переверни карточки, отправь в Anki кнопкой «🃏», повторяй интервально.
+
+## Слова
+
+\`\`\`flashcards {}
+job | /dʒɑːb/ | работа (место работы) | She got a new job.
+career | /kəˈrɪr/ | карьера | He wants to change his career.
+office | /ˈɔːfɪs/ | офис | I work in an office downtown.
+meeting | /ˈmiːtɪŋ/ | встреча, совещание | The meeting starts at ten.
+salary | /ˈsæləri/ | зарплата | The salary is quite good.
+colleague | /ˈkɑːliːɡ/ | коллега | My colleagues are friendly.
+boss | /bɔːs/ | начальник | My boss is very strict.
+skill | /skɪl/ | навык | Communication is a key skill.
+hire | /ˈhaɪər/ | нанимать | They hired ten new people.
+degree | /dɪˈɡriː/ | (учёная) степень; градус | She has a degree in biology.
+subject | /ˈsʌbdʒɪkt/ | предмет; тема | Maths is my favourite subject.
+exam | /ɪɡˈzæm/ | экзамен | I passed the exam easily.
+\`\`\`
+
+## Используй слова
+
+\`\`\`quiz {}
+The amount of money you earn each month is your ___.
++ salary
+- degree
+- skill
+- meeting
+\`\`\`
+
+\`\`\`blank {}
+I have a ___ in computer science, and my favourite ___ was maths.
+= degree
+= subject
+\`\`\`
+`,
+          homework: `
+1. Расскажи о своей работе или учёбе 5–6 предложениями (job, office, subject…).
+2. Отправь карточки в Anki и повтори.
+3. Составь 3 предложения со словами skill, salary, colleague.
+`,
+          cards: [
+            { q: "job", a: "работа (место работы)" },
+            { q: "career", a: "карьера" },
+            { q: "office", a: "офис" },
+            { q: "meeting", a: "встреча, совещание" },
+            { q: "salary", a: "зарплата" },
+            { q: "colleague", a: "коллега" },
+            { q: "boss", a: "начальник" },
+            { q: "skill", a: "навык" },
+            { q: "hire", a: "нанимать" },
+            { q: "degree", a: "(учёная) степень; градус" },
+            { q: "subject", a: "предмет; тема" },
+            { q: "exam", a: "экзамен" }
+          ]
+        }
+      ]
     }
   ]
 });
